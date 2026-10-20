@@ -329,6 +329,18 @@ function closeModal(){$('modalRoot').innerHTML=''}
 const FB_APP_ID='4332887070336858';
 const FB_SCOPES='ads_read,ads_management,business_management,leads_retrieval,pages_show_list,pages_read_engagement,pages_manage_ads,pages_manage_metadata,pages_messaging,instagram_basic,instagram_manage_messages,whatsapp_business_management,whatsapp_business_messaging';
 const fbRedirect=()=>location.origin+location.pathname;
+/* Trocador (Google Apps Script) que transforma o token de 1-2 h em um de ~60 dias. A chave do app fica só lá. */
+const TOKEN_SWAP_URL='https://script.google.com/macros/s/AKfycbwPyJ9h3z-WJnumXG1lKzLVl9MyNfeBzXnn-06wfUGzIjiUwMDqiovFmXDvleAv0HHa1A/exec';
+async function fbExtend(tk){
+  if(!TOKEN_SWAP_URL)return tk;
+  try{
+    const r=await fetch(TOKEN_SWAP_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:tk,redirect:'follow'});
+    const j=await r.json();
+    if(j.access_token){store.set('cm_exp',String(Date.now()+(Number(j.expires_in)||5184000)*1000));return j.access_token}
+    console.warn('Trocador de token:',j.erro);
+  }catch(e){console.warn('Trocador de token indisponível',e)}
+  return tk;
+}
 function fbLogin(){
   if(location.protocol!=='https:'){showErr('connectErr','O login com Facebook só funciona com o painel aberto pelo endereço https (site publicado). Aberto do computador, use o token manual abaixo.');$('manualBox').open=true;return}
   const st=Math.random().toString(36).slice(2);try{sessionStorage.setItem('cm_state',st)}catch(e){}
@@ -362,6 +374,7 @@ async function connect(){
       const have=new Set(S.accounts.map(a=>a.id)),miss=[...new Set(S.bmStruct.flatMap(b=>b.acc))].filter(id=>!have.has(id));
       for(const id of miss){try{S.accounts.push(await api(id,{fields:AF+',is_prepay_account,funding_source_details'}))}catch(e){}}
     }catch(e){S.bmStruct=null}
+    {const seen=new Set();S.accounts=S.accounts.filter(a=>a&&!seen.has(a.id)&&seen.add(a.id))}
     if($('rememberIn').checked){store.set('cm_token',S.token);store.set('cm_ver',S.ver)}
     enterApp(me.name);
   }catch(e){showErr('connectErr',e.message)}
@@ -1871,7 +1884,7 @@ const DEMO={};
 /* ---------- Início ---------- */
 const EMBED_TOKEN=''; // token antigo removido: cole o novo na tela de conexão com "Lembrar neste navegador"
 (function(){if(location.protocol!=='https:')$('fbHint').innerHTML='O botão funciona quando o painel está publicado num endereço <b>https</b>. Aberto do computador, use o <b>token manual</b> abaixo.';
-  const fbt=fbReturn();if(fbt){$('tokenIn').value=fbt;$('rememberIn').checked=true;connect();return}
+  const fbt=fbReturn();if(fbt){$('rememberIn').checked=true;showErr('connectErr','');fbExtend(fbt).then(t=>{$('tokenIn').value=t;connect()});return}
   const t=store.get('cm_token')||EMBED_TOKEN;if(t){$('tokenIn').value=t;$('verIn').value=store.get('cm_ver')||'v26.0';connect()}})();
 </script>
 </body>
