@@ -1,0 +1,1878 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Central Meta Ads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: barra de controle fixa no topo, abas de trabalho, tabelas operacionais. Painel de mídia paga, leitura rápida. */
+:root{
+  --bg:#f3f5f8; --panel:#ffffff; --line:#dde3ea; --fg:#14202e; --muted:#5d6b7c;
+  --accent:#1d5fd1; --accent-soft:#e6eefc; --good:#18794e; --good-soft:#e3f4ea;
+  --warn:#9a5b00; --warn-soft:#fdf0d8; --bad:#b42318; --bad-soft:#fde7e5; --wa:#128c4b;
+  --f-display:"Sora",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d131b; --panel:#141c27; --line:#243041; --fg:#e6ecf3; --muted:#8a98aa;
+  --accent:#6aa0ff; --accent-soft:#18263d; --good:#4cc38a; --good-soft:#11291f; --warn:#f0b44c; --warn-soft:#2d2210; --bad:#ff7a6e; --bad-soft:#331816; --wa:#3ccf7f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d131b; --panel:#141c27; --line:#243041; --fg:#e6ecf3; --muted:#8a98aa;
+  --accent:#6aa0ff; --accent-soft:#18263d; --good:#4cc38a; --good-soft:#11291f; --warn:#f0b44c; --warn-soft:#2d2210; --bad:#ff7a6e; --bad-soft:#331816; --wa:#3ccf7f; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1240px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-size:22px;letter-spacing:-.01em}
+h2{font-size:17px}
+.muted{color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.who{display:flex;gap:10px;align-items:center;font-size:13px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+select,input,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:8px 10px;max-width:100%}
+textarea{width:100%;min-height:70px;resize:vertical}
+button{font:inherit;font-weight:600;cursor:pointer;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:8px 12px}
+button:hover{border-color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.sm{padding:5px 9px;font-size:13px}
+button.wa{color:var(--wa);border-color:var(--wa)}
+button.danger{color:var(--bad);border-color:var(--bad)}
+a{color:var(--accent)}
+nav.tabs{display:flex;gap:4px;margin:18px 0 14px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--muted);padding:10px 14px;white-space:nowrap}
+nav.tabs button.on{color:var(--fg);border-bottom-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.kpi .v{font:600 24px/1.2 var(--f-mono);font-variant-numeric:tabular-nums;margin-top:6px}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:14px}
+.card-h{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;margin-bottom:10px}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.r,th.r{text-align:right}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.p-good{background:var(--good-soft);color:var(--good)} .p-warn{background:var(--warn-soft);color:var(--warn)} .p-bad{background:var(--bad-soft);color:var(--bad)} .p-mut{background:var(--accent-soft);color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:6px}
+.note{font-size:13px;color:var(--muted);background:var(--accent-soft);border-radius:8px;padding:10px 12px;margin-top:10px}
+.err{background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:10px 12px;margin-top:12px;font-size:14px}
+.demo-flag{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;margin-top:12px}
+.connect{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:10px}
+.connect ol{margin:8px 0 0;padding-left:20px} .connect li{margin-bottom:6px}
+.perm{font-family:var(--f-mono);font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;word-break:break-word}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.ig{display:flex;gap:12px;align-items:center}
+.ig img{width:48px;height:48px;border-radius:50%;object-fit:cover;background:var(--line)}
+.bar-row{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;align-items:center;margin:6px 0;font-size:13px}
+.bar-track{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin-top:3px}
+.bar-fill{height:100%;background:var(--accent)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;max-width:440px;width:100%}
+.modal .actions{margin-top:16px;justify-content:flex-end}
+.toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));right:16px;background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:14px;z-index:60}
+.lead-sub{font-size:12px;color:var(--muted)}
+.done td{opacity:.55}
+@media (max-width:760px){.connect{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== Tema profissional: faixa escura no topo, acento petróleo, KPIs codificados por cor ===== */
+:root{
+  --bg:#eef2f5; --panel:#ffffff; --line:#dbe2e8; --fg:#122230; --muted:#5b6b78;
+  --accent:#0b7f86; --accent-soft:#e0f2f2; --ink:#0f2233; --ink-2:#17344c; --on-ink:#e9f3f6; --on-ink-muted:#9fb6c4;
+  --k1:#d98a1c; --k2:#18905a; --k3:#0b7f86; --k4:#7a5af0; --k5:#2f6fd6; --k6:#c2410c;
+  --good:#167a4d; --good-soft:#e1f4ea; --warn:#9a5b00; --warn-soft:#fbf0d9; --bad:#b42318; --bad-soft:#fde8e6; --wa:#128c4b;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b141c; --panel:#121e29; --line:#22323f; --fg:#e4edf3; --muted:#8ea1b0;
+  --accent:#3cc4c9; --accent-soft:#12303a; --ink:#0a1a27; --ink-2:#123048; --on-ink:#e9f3f6; --on-ink-muted:#8fb0c2;
+  --k1:#f0a640; --k2:#3fcf8e; --k3:#3cc4c9; --k4:#a08bff; --k5:#6aa0ff; --k6:#ff8a5c;
+  --good:#4cc38a; --good-soft:#11291f; --warn:#f0b44c; --warn-soft:#2d2210; --bad:#ff7a6e; --bad-soft:#331816; --wa:#3ccf7f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b141c; --panel:#121e29; --line:#22323f; --fg:#e4edf3; --muted:#8ea1b0;
+  --accent:#3cc4c9; --accent-soft:#12303a; --ink:#0a1a27; --ink-2:#123048; --on-ink:#e9f3f6; --on-ink-muted:#8fb0c2;
+  --k1:#f0a640; --k2:#3fcf8e; --k3:#3cc4c9; --k4:#a08bff; --k5:#6aa0ff; --k6:#ff8a5c;
+  --good:#4cc38a; --good-soft:#11291f; --warn:#f0b44c; --warn-soft:#2d2210; --bad:#ff7a6e; --bad-soft:#331816; --wa:#3ccf7f; color-scheme:dark}
+
+body{background:var(--bg)}
+.wrap{padding-block:0 60px}
+header.top{background:linear-gradient(120deg,var(--ink) 0%,var(--ink-2) 100%);color:var(--on-ink);margin:0 0 18px;padding:22px 24px;border-radius:0 0 16px 16px;box-shadow:0 8px 24px rgba(10,30,45,.18)}
+header.top h1{font-size:24px;color:var(--on-ink);display:flex;align-items:center;gap:10px}
+header.top h1::before{content:"";width:10px;height:26px;border-radius:3px;background:var(--accent);display:inline-block}
+header.top .muted{color:var(--on-ink-muted)!important}
+header.top .who{color:var(--on-ink)}
+header.top .pill.p-good{background:rgba(60,207,127,.18);color:#7ee3ae}
+
+.bar{border-radius:12px;box-shadow:0 1px 2px rgba(15,34,51,.05)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{filter:brightness(1.08)}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button.primary:hover{color:#fff}
+a{color:var(--accent)}
+
+nav.tabs{border-bottom:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px;gap:4px}
+nav.tabs button{border-radius:8px;border-bottom:0;padding:9px 14px;font-weight:600}
+nav.tabs button:hover{background:var(--accent-soft);color:var(--accent)}
+nav.tabs button.on{background:var(--accent);color:#fff}
+
+.kpis{gap:12px}
+.kpi{position:relative;overflow:hidden;border-radius:12px;padding:16px 16px 14px;box-shadow:0 1px 2px rgba(15,34,51,.05);border-top:4px solid var(--kc,var(--accent))}
+.kpi:nth-child(1){--kc:var(--k1)} .kpi:nth-child(2){--kc:var(--k2)} .kpi:nth-child(3){--kc:var(--k3)}
+.kpi:nth-child(4){--kc:var(--k4)} .kpi:nth-child(5){--kc:var(--k5)} .kpi:nth-child(6){--kc:var(--k6)}
+.kpi .l{color:var(--kc)}
+.kpi .v{font-size:clamp(16px,1.5vw,22px);white-space:nowrap}
+
+.card{border-radius:14px;box-shadow:0 1px 3px rgba(15,34,51,.06)}
+.card h2{display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";width:4px;height:16px;border-radius:2px;background:var(--accent)}
+.bar-fill{background:linear-gradient(90deg,var(--accent),var(--k5))}
+th{background:var(--bg)}
+th:first-child{border-top-left-radius:8px} th:last-child{border-top-right-radius:8px}
+tbody tr:hover td{background:var(--accent-soft)}
+.note{background:var(--accent-soft);border-left:3px solid var(--accent)}
+.demo-flag{border-left:3px solid var(--warn)}
+.err{border-left:3px solid var(--bad)}
+.perm{background:var(--accent-soft);border-color:transparent}
+#connectView{margin-top:0}
+@media (max-width:600px){header.top{border-radius:0 0 12px 12px;padding:18px 16px}}
+
+.alert-row{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;margin-top:8px;border-left:4px solid var(--warn);background:var(--warn-soft)}
+.alert-row.al-bad{border-left-color:var(--bad);background:var(--bad-soft)}
+.funnel{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.fstep{background:var(--bg);border-radius:10px;padding:10px 12px;border-top:4px solid var(--muted)}
+.fstep .l{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--muted)}
+.fstep .v{font-size:22px;font-weight:600;margin-top:2px}
+.fs-chamado{border-top-color:var(--k5)} .fs-negociando{border-top-color:var(--k1)} .fs-fechou{border-top-color:var(--good)} .fs-perdido{border-top-color:var(--bad)}
+select.stage{font-weight:600;font-size:13px;padding:6px 8px}
+select.st-fechou{color:var(--good);border-color:var(--good)} select.st-perdido{color:var(--bad);border-color:var(--bad)}
+select.st-chamado{color:var(--k5);border-color:var(--k5)} select.st-negociando{color:var(--k1);border-color:var(--k1)}
+@media (max-width:640px){.funnel{grid-template-columns:repeat(2,minmax(0,1fr))}.alert-row{flex-direction:column;align-items:flex-start}}
+
+.bill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.bill-grid>div{background:var(--bg);border-radius:10px;padding:12px 14px;min-width:0}
+.bill-grid .l{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--muted)}
+.bill-grid .v{font-size:20px;font-weight:600;margin:4px 0 2px}
+
+.dest{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.dest-url{font-family:var(--f-mono);font-size:12px;overflow-wrap:anywhere}
+
+.bm-row td{background:var(--accent-soft);border-bottom:1px solid var(--line)}
+.sub-row td{font-weight:600;background:var(--bg);font-size:13px}
+.total-row td{font-weight:700;background:var(--ink);color:var(--on-ink);font-size:14px}
+.total-row td:first-child{border-bottom-left-radius:8px}.total-row td:last-child{border-bottom-right-radius:8px}
+.dsl-in{width:120px;text-align:right;padding:5px 8px}
+
+tr.blocked td{background:var(--bad-soft);color:var(--bad)}
+tr.blocked td b{color:var(--bad)}
+tr.blocked .dsl-in{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.blocked-sum td{color:var(--bad);font-weight:600;font-size:13px;background:var(--bad-soft)}
+
+.ab-row{display:flex;gap:12px;align-items:end;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.ab-in{width:100%;text-align:right}
+
+.ib{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:14px}
+.ib-list{max-height:62vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.ib-item{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;padding:10px 12px;font-weight:400}
+.ib-item:hover{color:var(--fg)}
+.ib-item.on{background:var(--accent-soft)}
+.ib-thread{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow:auto;padding:4px 2px}
+.msg{max-width:78%;padding:8px 11px;border-radius:12px;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.in{background:var(--bg);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.out{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg .t{font-size:11px;opacity:.75;margin-top:3px}
+.ib-step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.ib-step:last-child{border-bottom:0}
+@media (max-width:760px){.ib{grid-template-columns:1fr}.ib-list{max-height:40vh}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Central Meta Ads</h1>
+      <div class="muted" style="font-size:13px">Campanhas, gastos, compras, pixels e leads das suas contas e BMs</div>
+    </div>
+    <div class="who" id="who"></div>
+  </header>
+
+  <!-- CONEXÃO -->
+  <section id="connectView" class="card">
+    <h2>Conectar à sua conta Meta</h2>
+    <div id="fbBox" style="margin:6px 0 18px">
+      <button class="primary" style="font-size:16px;padding:12px 22px" onclick="fbLogin()">Entrar com Facebook</button>
+      <div class="lead-sub" id="fbHint" style="margin-top:8px">Entre com o seu Facebook e autorize. O painel encontra sozinho as suas BMs, contas de anúncios, páginas, Instagram e WhatsApp.</div>
+    </div>
+    <details id="manualBox"><summary style="cursor:pointer;font-weight:600;margin-bottom:10px">Conectar com token manual (avançado)</summary>
+    <div class="connect">
+      <div>
+        <ol>
+          <li>Abra o <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Graph API Explorer</a> logado no seu perfil do Facebook (o mesmo que tem acesso às BMs).</li>
+          <li>Em <b>Meta App</b>, escolha um app seu (se não tiver, crie um em developers.facebook.com, tipo "Empresa").</li>
+          <li>Em <b>Permissões</b>, adicione as abaixo e clique em <b>Generate Access Token</b>. Aceite tudo e marque todas as páginas e contas.</li>
+          <li>Copie o token gerado e cole ao lado.</li>
+        </ol>
+        <div class="perm" id="permList">ads_read, ads_management, business_management, leads_retrieval, pages_show_list, pages_read_engagement, pages_manage_ads, pages_manage_metadata, pages_messaging, instagram_basic, instagram_manage_messages, whatsapp_business_management, whatsapp_business_messaging</div>
+        <button class="sm" style="margin-top:8px" onclick="copyText(document.getElementById('permList').textContent)">Copiar permissões</button>
+        <div class="note">O token do Explorer expira em cerca de 1 a 2 horas. Para não precisar gerar toda hora, use o botão "Estender token" na <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" rel="noopener">ferramenta de depuração de token</a> (dura cerca de 60 dias).</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="field"><label for="tokenIn">Token de acesso</label><textarea id="tokenIn" placeholder="EAAB..."></textarea></div>
+        <div class="field"><label for="verIn">Versão da API</label><input id="verIn" value="v26.0"></div>
+        <label style="font-size:13px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="rememberIn" checked> Lembrar neste navegador</label>
+        <div class="actions"><button class="primary" onclick="connect()">Conectar</button><button onclick="startDemo()">Ver com dados de exemplo</button></div>
+        <div class="note">O token fica só no seu navegador e vai direto para os servidores da Meta. Não envie este arquivo para ninguém depois de salvar o token.</div>
+      </div>
+    </div>
+    </details>
+    <div id="connectErr"></div>
+  </section>
+
+  <!-- APP -->
+  <section id="appView" hidden>
+    <div class="bar">
+      <div class="field" style="flex:1 1 260px"><label for="accSel">Conta de anúncio</label><select id="accSel" onchange="selectAccount(this.value)"></select></div>
+      <div class="field"><label for="perSel">Período</label>
+        <select id="perSel" onchange="S.period=this.value;loadTab()">
+          <option value="today">Hoje</option><option value="yesterday">Ontem</option><option value="last_7d">Últimos 7 dias</option>
+          <option value="last_30d" selected>Últimos 30 dias</option><option value="this_month">Este mês</option><option value="last_month">Mês passado</option><option value="maximum">Todo o período</option>
+        </select></div>
+      <a id="payTop" href="#" target="_blank" rel="noopener"><button class="primary" tabindex="-1">Pagar</button></a>
+      <button onclick="loadTab(true)">Atualizar</button>
+      <button onclick="logout()">Sair</button>
+    </div>
+    <div id="demoFlag" class="demo-flag" hidden>Dados de exemplo. Nada aqui vem da sua conta. Conecte um token para ver os seus números.</div>
+    <div id="appErr"></div>
+
+    <nav class="tabs" id="tabs">
+      <button data-t="overview" class="on">Visão geral</button>
+      <button data-t="campaigns">Campanhas</button>
+      <button data-t="creatives">Criativos</button>
+      <button data-t="create">Nova campanha</button>
+      <button data-t="pixels">Pixels</button>
+      <button data-t="leads">Formulários e leads</button>
+      <button data-t="inbox">Caixa de entrada</button>
+      <button data-t="wa">WhatsApp</button>
+      <button data-t="instagram">Páginas e Instagram</button>
+      <button data-t="bms">BMs e contas</button>
+    </nav>
+    <div id="tabBody"></div>
+  </section>
+</div>
+<div id="modalRoot"></div>
+
+<script>
+const S={token:'',ver:'v26.0',demo:false,period:'last_30d',tab:'overview',accounts:[],acc:null,pages:null,bms:null,cache:{}};
+const PURCHASE=['omni_purchase','purchase','offsite_conversion.fb_pixel_purchase','onsite_web_purchase'];
+const LEAD=['lead','onsite_conversion.lead_grouped','offsite_conversion.fb_pixel_lead','leadgen_grouped'];
+const CHECKOUT=['omni_initiated_checkout','initiate_checkout','offsite_conversion.fb_pixel_initiate_checkout'];
+const MSG=['onsite_conversion.messaging_conversation_started_7d'];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+
+/* ---------- API ---------- */
+function traduz(e){
+  const m={190:'Sessão expirada. Clique em Sair e depois em Entrar com Facebook de novo.',200:'Falta permissão para essa ação. Gere o token de novo marcando todas as permissões da lista.',10:'Falta permissão para essa ação.',17:'Limite de chamadas da Meta atingido. Espere alguns minutos e atualize.',4:'Limite de chamadas atingido. Espere alguns minutos.',100:'Pedido inválido: '+(e.error_user_msg?(e.error_user_title?e.error_user_title+'. ':'')+e.error_user_msg:(e.message||'')),131047:'Passaram mais de 24 horas desde a última mensagem do cliente. Use um modelo aprovado.',551:'Esta pessoa não pode receber mensagens agora.'};
+  return (m[e.code]||e.message||'Erro desconhecido')+(e.code?` (código ${e.code})`:'');
+}
+async function api(path,params={},method='GET',token){
+  const u=new URL(`https://graph.facebook.com/${S.ver}/${path}`);
+  const p={...params,access_token:token||S.token};
+  const opt={method};
+  if(method==='GET') Object.entries(p).forEach(([k,v])=>u.searchParams.set(k,v));
+  else opt.body=new URLSearchParams(p);
+  let r; try{r=await fetch(u,opt)}catch(e){throw new Error('Sem conexão com a Meta. Verifique sua internet.')}
+  const j=await r.json();
+  if(j.error) throw new Error(traduz(j.error));
+  return j;
+}
+async function all(path,params={},max=500,token){
+  let out=[],j=await api(path,{limit:100,...params},'GET',token);
+  out.push(...(j.data||[]));
+  while(j.paging&&j.paging.next&&out.length<max){
+    const r=await fetch(j.paging.next); j=await r.json(); if(j.error) throw new Error(traduz(j.error)); out.push(...(j.data||[]));
+  }
+  return out;
+}
+
+/* ---------- Formatação ---------- */
+function money(v,cur){cur=cur||(S.acc&&S.acc.currency)||'BRL';const n=Number(v||0);try{return n.toLocaleString('pt-BR',{style:'currency',currency:cur})}catch(e){return n.toFixed(2)}}
+const int=v=>Number(v||0).toLocaleString('pt-BR');
+const pct=v=>(Number(v||0)).toLocaleString('pt-BR',{maximumFractionDigits:2})+'%';
+const dt=s=>s?new Date(s).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—';
+function act(list,types){if(!list)return 0;for(const t of types){const f=list.find(a=>a.action_type===t);if(f)return Number(f.value)}return 0}
+function statusPill(s){
+  const map={ACTIVE:['Ativa','p-good'],PAUSED:['Pausada','p-mut'],CAMPAIGN_PAUSED:['Campanha pausada','p-mut'],ADSET_PAUSED:['Conjunto pausado','p-mut'],DELETED:['Excluída','p-bad'],ARCHIVED:['Arquivada','p-mut'],IN_PROCESS:['Processando','p-warn'],WITH_ISSUES:['Com problemas','p-bad'],DISAPPROVED:['Reprovada','p-bad'],PENDING_REVIEW:['Em análise','p-warn']};
+  const [t,c]=map[s]||[s||'—','p-mut'];return `<span class="pill ${c}">${esc(t)}</span>`;
+}
+function accStatus(n){const m={1:['Ativa','p-good'],2:['Desativada','p-bad'],3:['Pagamento pendente','p-bad'],7:['Em análise','p-warn'],8:['Liquidação pendente','p-warn'],9:['Período de carência','p-warn'],100:['Fechamento pendente','p-warn'],101:['Fechada','p-bad'],201:['Ativa','p-good']};const [t,c]=m[n]||['Status '+n,'p-mut'];return `<span class="pill ${c}">${t}</span>`}
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+async function copyText(t){try{await navigator.clipboard.writeText(t);toast('Copiado')}catch(e){prompt('Copie:',t)}}
+function showErr(where,msg){$(where).innerHTML=msg?`<div class="err">${esc(msg)}</div>`:''}
+function loading(){$('tabBody').innerHTML='<div class="card muted">Carregando dados da Meta…</div>'}
+function confirmBox(title,text,okLabel,onOk,danger){
+  $('modalRoot').innerHTML=`<div class="modal" role="dialog" aria-modal="true"><div class="box"><h2>${esc(title)}</h2><p class="muted">${text}</p><div class="actions"><button onclick="closeModal()">Cancelar</button><button class="${danger?'danger':'primary'}" id="okBtn">${esc(okLabel)}</button></div></div></div>`;
+  $('okBtn').onclick=async()=>{closeModal();await onOk()};
+}
+function closeModal(){$('modalRoot').innerHTML=''}
+
+/* ---------- Login com Facebook (sem token manual) ---------- */
+const FB_APP_ID='4332887070336858';
+const FB_SCOPES='ads_read,ads_management,business_management,leads_retrieval,pages_show_list,pages_read_engagement,pages_manage_ads,pages_manage_metadata,pages_messaging,instagram_basic,instagram_manage_messages,whatsapp_business_management,whatsapp_business_messaging';
+const fbRedirect=()=>location.origin+location.pathname;
+function fbLogin(){
+  if(location.protocol!=='https:'){showErr('connectErr','O login com Facebook só funciona com o painel aberto pelo endereço https (site publicado). Aberto do computador, use o token manual abaixo.');$('manualBox').open=true;return}
+  const st=Math.random().toString(36).slice(2);try{sessionStorage.setItem('cm_state',st)}catch(e){}
+  const u=new URL(`https://www.facebook.com/${S.ver||'v26.0'}/dialog/oauth`);
+  Object.entries({client_id:FB_APP_ID,redirect_uri:fbRedirect(),response_type:'token',scope:FB_SCOPES,state:st,auth_type:'rerequest'}).forEach(([k,v])=>u.searchParams.set(k,v));
+  location.href=u.toString();
+}
+/* Volta do Facebook: o token chega no endereço (#access_token=...) e sai dele logo em seguida */
+function fbReturn(){
+  if(!/access_token=|error=/.test(location.hash))return null;
+  const h=new URLSearchParams(location.hash.slice(1));history.replaceState(null,'',location.pathname+location.search);
+  let st=null;try{st=sessionStorage.getItem('cm_state');sessionStorage.removeItem('cm_state')}catch(e){}
+  if(h.get('error')){showErr('connectErr','O Facebook não autorizou: '+(h.get('error_description')||h.get('error')).replace(/\+/g,' '));return null}
+  if(!st||h.get('state')!==st){showErr('connectErr','Login não confirmado. Clique em Entrar com Facebook de novo.');return null}
+  const exp=Number(h.get('expires_in')||0);if(exp)store.set('cm_exp',String(Date.now()+exp*1000));
+  return h.get('access_token');
+}
+
+/* ---------- Conexão ---------- */
+async function connect(){
+  S.token=$('tokenIn').value.trim(); S.ver=$('verIn').value.trim()||'v26.0'; S.demo=false;
+  if(!S.token){showErr('connectErr','Cole o token antes de conectar.');return}
+  showErr('connectErr','');
+  try{
+    const me=await api('me',{fields:'name,id'});
+    const AF='name,account_id,account_status,currency,amount_spent,balance,spend_cap,business{name,id},timezone_name';
+    try{S.accounts=await all('me/adaccounts',{fields:AF+',is_prepay_account,funding_source_details'})}
+    catch(e){S.accounts=await all('me/adaccounts',{fields:AF})}
+    try{
+      S.bmStruct=(await all('me/businesses',{fields:'name,owned_ad_accounts.limit(200){id},client_ad_accounts.limit(200){id}'})).map(b=>({id:b.id,name:b.name.trim(),acc:[...new Set([...((b.owned_ad_accounts||{}).data||[]),...((b.client_ad_accounts||{}).data||[])].map(x=>x.id))]}));
+      const have=new Set(S.accounts.map(a=>a.id)),miss=[...new Set(S.bmStruct.flatMap(b=>b.acc))].filter(id=>!have.has(id));
+      for(const id of miss){try{S.accounts.push(await api(id,{fields:AF+',is_prepay_account,funding_source_details'}))}catch(e){}}
+    }catch(e){S.bmStruct=null}
+    if($('rememberIn').checked){store.set('cm_token',S.token);store.set('cm_ver',S.ver)}
+    enterApp(me.name);
+  }catch(e){showErr('connectErr',e.message)}
+}
+function enterApp(name){
+  $('connectView').hidden=true;$('appView').hidden=false;$('demoFlag').hidden=!S.demo;
+  $('who').innerHTML=`<span class="pill p-good">Conectado</span><span>${esc(name)}</span>`;
+  const opt=a=>`<option value="${a.id}">${isBlocked(a)?'⛔ ':''}${esc(a.name)} · ${a.account_id}${isBlocked(a)?' · BLOQUEADA':''}</option>`;
+  if(!S.accounts.length)$('accSel').innerHTML='<option>Nenhuma conta encontrada</option>';
+  else{const groups=bmGroups();$('accSel').innerHTML=groups.map(g=>`<optgroup label="${esc(g.name)} (${g.acc.length})">${g.acc.map(opt).join('')}</optgroup>`).join('')}
+  const last=store.get('cm_acc')||'act_'+DEFAULT_ACC;selectAccount(S.accounts.find(a=>a.id===last)?last:(S.accounts[0]||{}).id);
+}
+function selectAccount(id){S.acc=S.accounts.find(a=>a.id===id)||null;if(S.acc&&$('payTop'))$('payTop').href=payUrl(S.acc);if(S.acc){store.set('cm_acc',id);$('accSel').value=id}S.cache={};loadTab()}
+function logout(){store.del('cm_token');S.token='';S.demo=false;S.cache={};S.pages=null;S.bms=null;$('appView').hidden=true;$('connectView').hidden=false;$('who').innerHTML='';$('tokenIn').value=''}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.tab=b.dataset.t;loadTab()});
+
+async function loadTab(force){
+  if(force)S.cache={},S.pages=null,S.bms=null;
+  showErr('appErr','');
+  if(!S.acc&&['overview','campaigns','creatives','pixels','create'].includes(S.tab)){$('tabBody').innerHTML='<div class="card muted">Nenhuma conta de anúncio disponível para este perfil.</div>';return}
+  loading();
+  try{({overview:tOverview,campaigns:tCampaigns,creatives:tCreatives,create:tCreate,wa:tWa,inbox:tInbox,pixels:tPixels,leads:tLeads,instagram:tInstagram,bms:tBms})[S.tab]()}
+  catch(e){showErr('appErr',e.message)}
+}
+const guard=fn=>async(...a)=>{try{await fn(...a)}catch(e){showErr('appErr',e.message);$('tabBody').innerHTML=''}};
+
+/* ---------- Dados (reais ou exemplo) ---------- */
+const INS='spend,impressions,reach,clicks,inline_link_clicks,ctr,cpc,cpm,frequency,actions,action_values,purchase_roas';
+async function getOverview(){
+  if(S.demo)return DEMO.overview;
+  const k='ov'+S.period;if(S.cache[k])return S.cache[k];
+  const [tot,days]=await Promise.all([
+    api(`${S.acc.id}/insights`,{fields:INS,date_preset:S.period}),
+    api(`${S.acc.id}/insights`,{fields:'spend,actions,action_values',date_preset:S.period,time_increment:1,limit:100})
+  ]);
+  return S.cache[k]={tot:(tot.data||[])[0]||{},days:days.data||[]};
+}
+async function getCampaigns(){
+  if(S.demo)return DEMO.campaigns;
+  const k='cp'+S.period;if(S.cache[k])return S.cache[k];
+  return S.cache[k]=await all(`${S.acc.id}/campaigns`,{fields:`name,status,effective_status,objective,daily_budget,lifetime_budget,start_time,insights.date_preset(${S.period}){${INS}}`},300);
+}
+async function getPixels(){
+  if(S.demo)return DEMO.pixels;
+  if(S.cache.px)return S.cache.px;
+  return S.cache.px=await all(`${S.acc.id}/adspixels`,{fields:'name,id,last_fired_time,is_unavailable,creation_time,owner_business{name,id}'});
+}
+async function getPages(){
+  if(S.demo)return DEMO.pages;
+  if(S.pages)return S.pages;
+  try{return S.pages=await all('me/accounts',{fields:'name,id,access_token,category,fan_count,instagram_business_account{id,username,name,followers_count,media_count,profile_picture_url}'})}
+  catch(e){return S.pages=await all('me/accounts',{fields:'name,id,access_token,category,fan_count'})}
+}
+async function getBms(){
+  if(S.demo)return DEMO.bms;
+  if(S.bms)return S.bms;
+  return S.bms=await all('me/businesses',{fields:'name,id,verification_status,created_time'});
+}
+
+/* ---------- Visão geral ---------- */
+/* ---------- Limite e pagamento ---------- */
+const cents=v=>Number(v||0)/100;
+const getDsl=()=>{try{return JSON.parse(store.get('cm_dsl')||'{}')}catch(e){return{}}};
+const DSL_KNOWN={'act_1611868927238040':869.52,'act_1898482041120807':252.47,'act_4410251125905680':252.47,'act_4550292431905059':1251.91,'act_3546037452224973':1251.91,'act_1567715887965873':251.84};// lidos na página de cobrança da Meta em 19/10/2026
+const dslOf=a=>{const m=getDsl();return m[a.id]!=null?Number(m[a.id]):Number(DSL_KNOWN[a.id]||a.adtrust_dsl||0)};
+function setDsl(id,v){const m=getDsl();const n=Number(String(v).replace(/\./g,'').replace(',','.'));if(isNaN(n)||v==='')delete m[id];else m[id]=n;store.set('cm_dsl',JSON.stringify(m));if(S.tab==='bms')tBms()}
+const payUrl=a=>`https://business.facebook.com/billing_hub/accounts/details?asset_id=${a.account_id}&placement=ads_manager`;
+function billingCard(a){
+  const cap=cents(a.spend_cap),spent=cents(a.amount_spent),bal=cents(a.balance),dsl=dslOf(a);
+  const left=cap?Math.max(0,cap-spent):null,used=cap?Math.min(100,spent/cap*100):0;
+  const fs=a.funding_source_details||{},pm=fs.display_string||'';
+  const lv=cap&&used>=90?'p-bad':cap&&used>=70?'p-warn':'p-good';
+  return `<div class="card bill"><div class="card-h"><h2>Limite e pagamento</h2>${bal>0?`<span class="pill p-warn">Pendente ${money(bal,a.currency)}</span>`:'<span class="pill p-good">Nada pendente</span>'}</div>
+    <div class="bill-grid">
+      <div><div class="l">Limite de gastos da conta</div><div class="v num">${cap?money(cap,a.currency):'Sem limite'}</div>
+        ${cap?`<div class="bar-track" style="height:10px;margin-top:6px"><div class="bar-fill" style="width:${used}%;background:var(--${used>=90?'bad':used>=70?'warn':'good'})"></div></div><div class="lead-sub">${pct(used)} usado · restam <b>${money(left,a.currency)}</b></div>`:'<div class="lead-sub">A conta pode gastar sem teto definido por você.</div>'}</div>
+      <div><div class="l">Valor pendente (a pagar)</div><div class="v num" style="color:${bal>0?'var(--warn)':'var(--good)'}">${money(bal,a.currency)}</div><div class="lead-sub">${a.is_prepay_account?'Conta pré-paga: adicione saldo para continuar veiculando.':'Cobrado no limite de cobrança ou na data de fechamento.'}</div></div>
+      <div><div class="l">Limite diário da Meta</div><div class="v num">${dsl>0?money(dsl,a.currency):'Não informado'}</div><div class="lead-sub">${dsl>0?'Informado por você na aba BMs e contas.':'A Meta não envia esse valor pela API. Veja em "Pagar" e informe na aba BMs e contas.'}</div></div>
+      <div><div class="l">Forma de pagamento</div><div class="v" style="font-size:15px">${pm?esc(pm):'Não informada'}</div><div class="lead-sub">${accStatus(a.account_status)}</div></div>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <a href="${payUrl(a)}" target="_blank" rel="noopener"><button class="primary" tabindex="-1">${a.is_prepay_account?'Adicionar saldo':'Pagar agora'} na Meta</button></a>
+      <button onclick="editCap('${a.id}')">${cap?'Alterar limite':'Definir limite'}</button>
+      ${cap?`<button onclick="capAction('${a.id}','reset')">Zerar contador do limite</button><button class="danger" onclick="capAction('${a.id}','delete')">Remover limite</button>`:''}
+    </div>
+    <div class="note">O pagamento é feito na página oficial da Meta, que abre já nesta conta. O painel não guarda dados de cartão.</div></div>`;
+}
+function editCap(id){
+  const a=S.accounts.find(x=>x.id===id),cap=cents(a.spend_cap);
+  $('modalRoot').innerHTML=`<div class="modal" role="dialog" aria-modal="true"><div class="box"><h2>Limite de gastos da conta</h2>
+    <p class="muted">Quando a conta atingir esse valor, todas as campanhas param. O novo limite conta a partir de agora.</p>
+    <div class="field"><label for="capIn">Novo limite (${esc(a.currency||'BRL')})</label><input id="capIn" type="number" min="100" step="10" value="${cap||''}" placeholder="Ex.: 1000"></div>
+    <div class="actions"><button onclick="closeModal()">Cancelar</button><button class="primary" id="capOk">Salvar limite</button></div></div></div>`;
+  $('capOk').onclick=async()=>{const v=Number($('capIn').value);if(!(v>=100)){toast('O mínimo é 100');return}closeModal();
+    if(S.demo){a.spend_cap=String(v*100);toast('Exemplo atualizado');return loadTab()}
+    try{await api(id,{spend_cap:String(v)},'POST');a.spend_cap=String(v*100);toast('Limite salvo');await refreshAcc(id)}catch(e){showErr('appErr',e.message)}};
+}
+function capAction(id,kind){
+  confirmBox(kind==='delete'?'Remover limite?':'Zerar contador?',kind==='delete'?'A conta fica sem teto de gastos definido por você.':'O valor já gasto volta a contar do zero em relação ao limite atual.',kind==='delete'?'Remover':'Zerar',async()=>{
+    if(S.demo){toast('Exemplo: nada foi alterado');return}
+    try{await api(id,{spend_cap_action:kind},'POST');toast(kind==='delete'?'Limite removido':'Contador zerado');await refreshAcc(id)}catch(e){showErr('appErr',e.message)}
+  },kind==='delete');
+}
+async function refreshAcc(id){try{const r=await api(id,{fields:'spend_cap,amount_spent,balance,account_status'});Object.assign(S.accounts.find(x=>x.id===id),r)}catch(e){}loadTab()}
+
+const tOverview=guard(async()=>{
+  const {tot,days}=await getOverview(); const a=S.acc;
+  const buys=act(tot.actions,PURCHASE), val=act(tot.action_values,PURCHASE), spend=Number(tot.spend||0);
+  const leads=act(tot.actions,LEAD), chk=act(tot.actions,CHECKOUT), msgs=act(tot.actions,MSG);
+  const roas=spend?val/spend:0;
+  const maxS=Math.max(1,...days.map(d=>Number(d.spend||0)));
+  $('tabBody').innerHTML=`
+  <div id="alertsBox"></div>
+  <div class="kpis">
+    <div class="kpi"><div class="l">Gasto no período</div><div class="v">${money(spend)}</div><div class="s">${int(tot.impressions)} impressões</div></div>
+    <div class="kpi"><div class="l">Compras</div><div class="v">${int(buys)}</div><div class="s">${buys?money(spend/buys)+' por compra':'nenhuma registrada'}</div></div>
+    <div class="kpi"><div class="l">Valor de compras</div><div class="v">${money(val)}</div><div class="s">ROAS ${roas.toLocaleString('pt-BR',{maximumFractionDigits:2})}x</div></div>
+    <div class="kpi"><div class="l">Leads</div><div class="v">${int(leads)}</div><div class="s">${leads?money(spend/leads)+' por lead':'—'}</div></div>
+    <div class="kpi"><div class="l">Cliques no link</div><div class="v">${int(tot.inline_link_clicks)}</div><div class="s">CTR ${pct(tot.ctr)} · CPC ${money(tot.cpc)}</div></div>
+    <div class="kpi"><div class="l">Conversas iniciadas</div><div class="v">${int(msgs)}</div><div class="s">${int(chk)} checkouts iniciados</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><div class="card-h"><h2>Gasto e compras por dia</h2></div>
+      ${days.length?days.slice().reverse().slice(0,31).map(d=>{const s=Number(d.spend||0),b=act(d.actions,PURCHASE);return `<div class="bar-row"><div><div class="mono" style="font-size:12px">${new Date(d.date_start+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})}</div><div class="bar-track"><div class="bar-fill" style="width:${s/maxS*100}%"></div></div></div><div class="num r" style="text-align:right">${money(s)}<div class="lead-sub">${b} compra${b==1?'':'s'}</div></div></div>`}).join(''):'<p class="muted">Sem gasto neste período.</p>'}
+    </div>
+    <div class="card"><h2>Conta</h2>
+      <table style="margin-top:8px"><tbody>
+        <tr><td class="muted">Nome</td><td>${esc(a.name)}</td></tr>
+        <tr><td class="muted">ID</td><td class="mono">act_${a.account_id}</td></tr>
+        <tr><td class="muted">Status</td><td>${accStatus(a.account_status)}</td></tr>
+        <tr><td class="muted">BM</td><td>${a.business?esc(a.business.name):'Conta pessoal'}</td></tr>
+        <tr><td class="muted">Gasto total da conta</td><td class="num">${money(Number(a.amount_spent||0)/100)}</td></tr>
+        <tr><td class="muted">Valor pendente</td><td class="num">${money(Number(a.balance||0)/100)}</td></tr>
+        <tr><td class="muted">Limite de gastos</td><td class="num">${a.spend_cap&&Number(a.spend_cap)?money(cents(a.spend_cap)):'Sem limite'}</td></tr>
+        <tr><td class="muted">Fuso</td><td>${esc(a.timezone_name||'—')}</td></tr>
+      </tbody></table>
+      <div class="actions" style="margin-top:12px"><a href="https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${a.account_id}" target="_blank" rel="noopener">Abrir no Gerenciador</a> · <a href="${payUrl(a)}" target="_blank" rel="noopener">Pagamentos</a></div>
+    </div>
+  </div>
+  ${billingCard(a)}
+  <div class="note"><b>Sobre "compras realmente feitas":</b> estes números são o que o pixel e a API de conversões enviaram para a Meta, dentro da janela de atribuição (padrão: 7 dias após clique, 1 dia após visualização). Para confirmar que o dinheiro entrou, compare com os pedidos pagos no seu sistema ou gateway no mesmo período. Se a Meta mostra bem mais compras que o seu sistema, o evento Purchase pode estar disparando em página errada ou duplicado.</div>`;
+  renderAlerts();
+});
+
+/* ---------- Campanhas ---------- */
+const tCampaigns=guard(async()=>{
+  const list=await getCampaigns();
+  const rows=list.map(c=>{const i=(c.insights&&c.insights.data&&c.insights.data[0])||{};const sp=Number(i.spend||0),b=act(i.actions,PURCHASE),v=act(i.action_values,PURCHASE),l=act(i.actions,LEAD);return{c,i,sp,b,v,l}}).sort((x,y)=>y.sp-x.sp);
+  const budget=c=>c.daily_budget?money(c.daily_budget/100)+'/dia':c.lifetime_budget?money(c.lifetime_budget/100)+' total':'No conjunto';
+  $('tabBody').innerHTML=`<div class="card"><div class="card-h"><h2>${list.length} campanhas</h2><span class="muted" style="font-size:13px">Ordenadas por gasto no período</span></div>
+  <div class="tbl"><table><thead><tr><th>Campanha</th><th>Status</th><th>Orçamento</th><th class="r">Gasto</th><th class="r">Compras</th><th class="r">Custo/compra</th><th class="r">Valor</th><th class="r">ROAS</th><th class="r">Leads</th><th class="r">CTR</th><th></th></tr></thead><tbody>
+  ${rows.map(({c,i,sp,b,v,l})=>`<tr><td style="min-width:200px"><b>${esc(c.name)}</b><div class="lead-sub">${esc((c.objective||'').replace('OUTCOME_','').toLowerCase())} · <span class="mono">${c.id}</span></div></td>
+  <td>${statusPill(c.effective_status||c.status)}</td><td class="num">${budget(c)}</td>
+  <td class="r num">${money(sp)}</td><td class="r num">${int(b)}</td><td class="r num">${b?money(sp/b):'—'}</td><td class="r num">${money(v)}</td>
+  <td class="r num">${sp?(v/sp).toLocaleString('pt-BR',{maximumFractionDigits:2})+'x':'—'}</td><td class="r num">${int(l)}</td><td class="r num">${i.ctr?pct(i.ctr):'—'}</td>
+  <td><div class="actions"><button class="sm" data-n="${esc(c.name)}" onclick="showCampLinks('${c.id}',this.dataset.n)">Ver links</button><button class="sm" onclick="copyCampaign('${c.id}')">Copiar para outra BM</button><button class="sm" onclick="dupHere('${c.id}',this.dataset.n)" data-n="${esc(c.name)}">Duplicar aqui</button>${c.status==='ACTIVE'?`<button class="sm danger" onclick="toggleCamp('${c.id}','PAUSED',this.dataset.n)" data-n="${esc(c.name)}">Pausar</button>`:c.status==='PAUSED'?`<button class="sm" onclick="toggleCamp('${c.id}','ACTIVE',this.dataset.n)" data-n="${esc(c.name)}">Ativar</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="11" class="muted">Nenhuma campanha nesta conta.</td></tr>'}
+  </tbody></table></div></div>`;
+});
+function toggleCamp(id,st,name){
+  if(st==='ACTIVE')return activateWithBudget(id,name);
+  confirmBox(st==='PAUSED'?'Pausar campanha?':'Ativar campanha?',`<b>${esc(name)}</b> vai ficar ${st==='PAUSED'?'pausada e para de gastar agora':'ativa e volta a gastar o orçamento'}.`,st==='PAUSED'?'Pausar':'Ativar',async()=>{
+    if(S.demo){const c=DEMO.campaigns.find(x=>x.id===id);c.status=c.effective_status=st;toast('Exemplo atualizado');return tCampaigns()}
+    try{await api(id,{status:st},'POST');toast(st==='PAUSED'?'Campanha pausada':'Campanha ativada');delete S.cache['cp'+S.period];tCampaigns()}catch(e){showErr('appErr',e.message)}
+  },st==='PAUSED');
+}
+
+/* ---------- Pixels ---------- */
+const tPixels=guard(async()=>{
+  const px=await getPixels();
+  const health=p=>{if(p.is_unavailable)return'<span class="pill p-bad">Indisponível</span>';if(!p.last_fired_time)return'<span class="pill p-bad">Nunca disparou</span>';const h=(Date.now()-new Date(p.last_fired_time))/36e5;return h<24?'<span class="pill p-good">Ativo</span>':h<168?'<span class="pill p-warn">Parado há '+Math.round(h/24)+' dias</span>':'<span class="pill p-bad">Parado há '+Math.round(h/24)+' dias</span>'};
+  $('tabBody').innerHTML=`<div class="card"><div class="card-h"><h2>Pixels desta conta</h2></div>
+  <div class="tbl"><table><thead><tr><th>Pixel</th><th>Situação</th><th>Último disparo</th><th>BM dona</th><th></th></tr></thead><tbody>
+  ${px.map(p=>`<tr><td><b>${esc(p.name)}</b><div class="lead-sub mono">${p.id}</div></td><td>${health(p)}</td><td class="num">${dt(p.last_fired_time)}</td><td>${p.owner_business?esc(p.owner_business.name):'—'}</td>
+  <td><div class="actions"><button class="sm" onclick="pixelStats('${p.id}')">Eventos 24h</button><a class="sm" href="https://business.facebook.com/events_manager2/list/pixel/${p.id}/overview" target="_blank" rel="noopener">Gerenciador de Eventos</a></div></td></tr>`).join('')||'<tr><td colspan="5" class="muted">Nenhum pixel vinculado a esta conta.</td></tr>'}
+  </tbody></table></div><div id="pxStats"></div></div>
+  <div class="card"><h2>Vincular pixel a uma conta de anúncio</h2>
+    <p class="muted" style="font-size:14px">Compartilha um pixel da sua BM com outra conta de anúncio, para que ela possa otimizar e medir com ele. Você precisa ser administrador da BM dona do pixel.</p>
+    <div class="bar" style="border:0;padding:0;background:none">
+      <div class="field" style="flex:1 1 200px"><label for="lkPx">ID do pixel</label><input id="lkPx" value="${px[0]?px[0].id:''}"></div>
+      <div class="field" style="flex:1 1 200px"><label for="lkBm">ID da BM dona do pixel</label><input id="lkBm" value="${px[0]&&px[0].owner_business?px[0].owner_business.id:''}"></div>
+      <div class="field" style="flex:1 1 200px"><label for="lkAcc">Conta de anúncio (só números)</label><select id="lkAcc">${S.accounts.map(a=>`<option value="${a.account_id}">${esc(a.name)} · ${a.account_id}</option>`).join('')}</select></div>
+      <button class="primary" onclick="linkPixel()">Vincular</button>
+    </div>
+  </div>`;
+});
+const pixelStats=guard(async id=>{
+  $('pxStats').innerHTML='<p class="muted">Buscando eventos…</p>';
+  let rows;
+  if(S.demo)rows=DEMO.pxstats;
+  else{const j=await api(`${id}/stats`,{aggregation:'event',start_time:Math.floor(Date.now()/1000)-86400});const m={};(j.data||[]).forEach(b=>(b.data||[]).forEach(e=>m[e.value]=(m[e.value]||0)+Number(e.count)));rows=Object.entries(m).sort((a,b)=>b[1]-a[1])}
+  $('pxStats').innerHTML=`<h3 style="margin-top:16px;font-size:15px">Eventos recebidos nas últimas 24h</h3>${rows.length?`<table style="margin-top:6px;max-width:420px"><tbody>${rows.map(([e,c])=>`<tr><td>${esc(e)}</td><td class="r num">${int(c)}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">Nenhum evento nas últimas 24h.</p>'}`;
+});
+function linkPixel(){
+  const px=$('lkPx').value.trim(),bm=$('lkBm').value.trim(),acc=$('lkAcc').value;
+  if(!px||!bm){showErr('appErr','Preencha o ID do pixel e o ID da BM.');return}
+  confirmBox('Vincular pixel?',`O pixel <span class="mono">${esc(px)}</span> será compartilhado com a conta <span class="mono">${esc(acc)}</span>.`,'Vincular',async()=>{
+    if(S.demo)return toast('Exemplo: nada foi alterado');
+    try{await api(`${px}/shared_accounts`,{account_id:acc,business:bm},'POST');toast('Pixel vinculado');S.cache.px=null}catch(e){showErr('appErr',e.message)}
+  });
+}
+
+/* ---------- Formulários e leads ---------- */
+const doneKey='cm_done';
+const getDone=()=>{try{return JSON.parse(store.get(doneKey)||'{}')}catch(e){return{}}};
+function markDone(id){const d=getDone();d[id]?delete d[id]:d[id]=Date.now();store.set(doneKey,JSON.stringify(d));renderLeads()}
+let LEADS=[],FORMS=[];
+const tLeads=guard(async()=>{
+  const pages=await getPages();
+  $('tabBody').innerHTML=`<div class="card"><div class="card-h"><h2>Formulários de cadastro</h2>
+    <div class="actions"><select id="pgSel" aria-label="Página" onchange="store.set('cm_pg',this.value);loadForms()"><option value="*">Todas as páginas</option>${pages.map(p=>`<option value="${p.id}" ${p.id===store.get('cm_pg')?'selected':''}>${esc(p.name)}</option>`).join('')}</select><button onclick="loadForms()">Atualizar</button></div></div>
+    <div id="formsBox">${pages.length?'':'<p class="muted">Nenhuma página encontrada. Gere o token marcando as páginas e a permissão pages_show_list.</p>'}</div></div>
+    <div class="card"><div class="card-h"><h2>Mensagem padrão para WhatsApp</h2></div>
+    <textarea id="waMsg" aria-label="Mensagem do WhatsApp">${esc(store.get('cm_wa')||'Olá {nome}, tudo bem? Vi que você se cadastrou no nosso formulário e quero te ajudar. Posso te mandar os detalhes?')}</textarea>
+    <div class="lead-sub">Use {nome} para inserir o primeiro nome do lead.</div></div>
+    <div id="leadsBox"></div>`;
+  $('waMsg').oninput=e=>store.set('cm_wa',e.target.value);
+  if(pages.length)loadForms();
+});
+const loadForms=guard(async()=>{
+  const pages=await getPages();const v=$('pgSel').value;const sel=v==='*'?pages:pages.filter(p=>p.id===v);
+  $('formsBox').innerHTML='<p class="muted">Buscando formulários…</p>';
+  if(S.demo)FORMS=DEMO.forms.map(f=>({...f,_pg:pages[0]}));
+  else{FORMS=[];for(const pg of sel){const fs=await all(`${pg.id}/leadgen_forms`,{fields:'name,id,status,leads_count,created_time'},200,pg.access_token).catch(()=>[]);fs.forEach(f=>FORMS.push({...f,_pg:pg}))}}
+  FORMS.sort((a,b)=>new Date(b.created_time)-new Date(a.created_time));
+  $('formsBox').innerHTML=FORMS.length?`<div class="tbl"><table><thead><tr><th>Formulário</th><th>Status</th><th class="r">Leads</th><th>Criado</th><th></th></tr></thead><tbody>
+  ${FORMS.map(f=>`<tr><td><b>${esc(f.name)}</b><div class="lead-sub">${esc((f._pg||{}).name||'')} · <span class="mono">${f.id}</span></div></td><td>${statusPill(f.status)}</td><td class="r num">${int(f.leads_count)}</td><td class="num">${dt(f.created_time)}</td><td><button class="sm primary" onclick="loadLeads('${f.id}')">Ver leads</button></td></tr>`).join('')}
+  </tbody></table></div><div class="actions" style="margin-top:10px"><button onclick="loadLeads('*')">Ver leads de todos os formulários</button></div>`:(v==='*'?'<p class="muted">Nenhuma página tem formulários de cadastro.</p>':'<p class="muted">Esta página não tem formulários. Escolha "Todas as páginas" para procurar em todas.</p>');
+  if(FORMS.length&&!S.demo)loadLeads('*');
+});
+function fieldMap(l){const o={};(l.field_data||[]).forEach(f=>o[f.name]=(f.values||[]).join(', '));return o}
+function pick(o,keys){for(const k of Object.keys(o)){const lk=k.toLowerCase();if(keys.some(x=>lk.includes(x)))return o[k]}return''}
+const loadLeads=guard(async fid=>{
+  $('leadsBox').innerHTML='<div class="card muted">Buscando leads…</div>';
+  const forms=fid==='*'?FORMS:FORMS.filter(f=>f.id===fid);
+  LEADS=[];
+  for(const f of forms){
+    const ls=S.demo?DEMO.leads.filter(l=>l.form===f.id):await all(`${f.id}/leads`,{fields:'created_time,id,field_data,ad_name,campaign_name,platform'},2000,(f._pg||{}).access_token).catch(e=>{showErr('appErr','Formulário "'+f.name+'": '+e.message);return[]});
+    ls.forEach(l=>{const m=fieldMap(l);LEADS.push({id:l.id,form:f.name,time:l.created_time,ad:l.ad_name||'',camp:l.campaign_name||'',plat:l.platform||'',m,
+      nome:pick(m,['full_name','nome','name'])||'Sem nome',tel:pick(m,['phone','telefone','whats','celular']),email:pick(m,['email']),ig:pick(m,['instagram','insta','@'])})});
+  }
+  LEADS.sort((a,b)=>new Date(b.time)-new Date(a.time));renderLeads();if(S.acc)loadCampSpend();
+});
+function waNumber(t){let d=String(t||'').replace(/\D/g,'');if(!d)return'';if(d.length<=11)d='55'+d.replace(/^0+/,'');return d}
+function igHandle(v){const m=String(v||'').trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').replace(/^@/,'').split(/[/?\s]/)[0];return m}
+
+/* ---------- Alertas ---------- */
+const ALERT_DEF={semLead:50,cplMax:30,subida:30};
+const alertCfg=()=>{try{return {...ALERT_DEF,...JSON.parse(store.get('cm_alert')||'{}')}}catch(e){return {...ALERT_DEF}}};
+const ymd=d=>d.toISOString().slice(0,10);
+async function computeAlerts(){
+  const cfg=alertCfg(),out=[],acc=S.acc;
+  if(acc&&acc.account_status!==1)out.push({lv:'bad',t:'Conta de anúncio com problema',d:'Status atual: '+accStatus(acc.account_status).replace(/<[^>]+>/g,'')+'. Confira pagamentos e restrições no Gerenciador.'});
+  const camps=await getCampaigns();
+  let probAds=[],cur={},prev={};
+  if(S.demo){probAds=DEMO.adsProblem||[];DEMO.campaigns.forEach((c,i)=>{cur[c.id]=[(i+1)*120,(i+1)*3];prev[c.id]=[(i+1)*110,(i+1)*4]})}
+  else{
+    const now=new Date(),t0=new Date(now-864e5),a1=new Date(now-7*864e5),b0=new Date(now-8*864e5),b1=new Date(now-14*864e5);
+    const lvl=async(s,u)=>{const r=await all(`${acc.id}/insights`,{level:'campaign',fields:'campaign_id,spend,actions',time_range:JSON.stringify({since:ymd(s),until:ymd(u)})},300).catch(()=>[]);const m={};r.forEach(x=>m[x.campaign_id]=[Number(x.spend||0),act(x.actions,LEAD)+act(x.actions,PURCHASE)]);return m};
+    [cur,prev,probAds]=await Promise.all([lvl(a1,t0),lvl(b1,b0),all(`${acc.id}/ads`,{fields:'name,effective_status,campaign{name}',filtering:JSON.stringify([{field:'effective_status',operator:'IN',value:['DISAPPROVED','WITH_ISSUES']}])},100).catch(()=>[])]);
+  }
+  probAds.forEach(a=>out.push({lv:'bad',t:`Anúncio ${a.effective_status==='DISAPPROVED'?'reprovado':'com problema'}: ${a.name}`,d:(a.campaign?a.campaign.name+'. ':'')+'Abra no Gerenciador para ver o motivo e corrigir.'}));
+  camps.forEach(c=>{
+    if(c.effective_status!=='ACTIVE')return;
+    const i=(c.insights&&c.insights.data&&c.insights.data[0])||{},sp=Number(i.spend||0),r=act(i.actions,LEAD)+act(i.actions,PURCHASE);
+    if(sp>=cfg.semLead&&r===0)out.push({lv:'bad',t:`Gastando sem resultado: ${c.name}`,d:`${money(sp)} no período e nenhum lead ou compra. Considere pausar ou trocar o criativo.`,id:c.id,n:c.name});
+    else if(r>0&&sp/r>cfg.cplMax)out.push({lv:'warn',t:`Custo por resultado alto: ${c.name}`,d:`${money(sp/r)} por resultado, acima do seu limite de ${money(cfg.cplMax)}.`,id:c.id,n:c.name});
+    const a=cur[c.id],b=prev[c.id];
+    if(a&&b&&a[1]>0&&b[1]>0){const ca=a[0]/a[1],cb=b[0]/b[1],up=(ca/cb-1)*100;if(up>=cfg.subida)out.push({lv:'warn',t:`Custo subiu ${Math.round(up)}%: ${c.name}`,d:`Últimos 7 dias: ${money(ca)} por resultado. Semana anterior: ${money(cb)}.`,id:c.id,n:c.name})}
+  });
+  return out;
+}
+const renderAlerts=guard(async()=>{
+  const box=$('alertsBox');if(!box)return;
+  box.innerHTML='<div class="card" style="margin-top:0;margin-bottom:12px"><span class="muted">Verificando alertas…</span></div>';
+  const list=await computeAlerts(),cfg=alertCfg();
+  document.title=(list.length?`(${list.length}) `:'')+'Central Meta Ads';
+  box.innerHTML=`<div class="card" style="margin-top:0;margin-bottom:12px"><div class="card-h"><h2>Alertas ${list.length?`<span class="pill ${list.some(x=>x.lv==='bad')?'p-bad':'p-warn'}">${list.length}</span>`:'<span class="pill p-good">Tudo certo</span>'}</h2>
+    <details><summary class="muted" style="cursor:pointer;font-size:13px">Ajustar limites</summary>
+      <div class="actions" style="margin-top:8px;align-items:end">
+        <div class="field"><label for="al_sem">Gasto sem resultado (R$)</label><input id="al_sem" type="number" value="${cfg.semLead}" style="width:110px"></div>
+        <div class="field"><label for="al_cpl">Custo máximo por resultado (R$)</label><input id="al_cpl" type="number" value="${cfg.cplMax}" style="width:110px"></div>
+        <div class="field"><label for="al_up">Alta do custo na semana (%)</label><input id="al_up" type="number" value="${cfg.subida}" style="width:110px"></div>
+        <button class="sm primary" onclick="store.set('cm_alert',JSON.stringify({semLead:+$('al_sem').value,cplMax:+$('al_cpl').value,subida:+$('al_up').value}));renderAlerts();toast('Limites salvos')">Salvar</button>
+      </div></details></div>
+    ${list.length?list.map(a=>`<div class="alert-row al-${a.lv}"><div style="min-width:0"><b>${esc(a.t)}</b><div class="lead-sub">${esc(a.d)}</div></div>${a.id?`<button class="sm danger" data-n="${esc(a.n)}" onclick="toggleCamp('${a.id}','PAUSED',this.dataset.n)">Pausar</button>`:''}</div>`).join(''):'<p class="muted" style="margin:0;font-size:14px">Nenhuma campanha ativa passou dos seus limites neste período.</p>'}
+  </div>`;
+});
+let ALERT_TIMER=setInterval(async()=>{if(!S.acc||!S.token&&!S.demo)return;try{S.cache={};const l=await computeAlerts();document.title=(l.length?`(${l.length}) `:'')+'Central Meta Ads';const crit=l.filter(x=>x.lv==='bad').length;if(crit)toast(`${crit} alerta(s) crítico(s). Veja a Visão geral.`);if(S.tab==='overview')renderAlerts()}catch(e){}},15*60000);
+
+
+/* ---------- Destino dos anúncios ---------- */
+function adLinks(c){
+  c=c||{};const out=[],add=(l,u)=>{if(u&&!out.some(x=>x.u===u))out.push({l,u})};
+  const tags=c.url_tags?(s=>s+(s.includes('?')?'&':'?')+c.url_tags):(s=>s);
+  const o=c.object_story_spec||{},ld=o.link_data||{},vd=o.video_data||{};
+  const cta=(ld.call_to_action||vd.call_to_action||{}),cv=cta.value||{};
+  const fid=cv.lead_gen_form_id;
+  if(fid)add('Formulário instantâneo','form:'+fid);
+  if(/WHATSAPP/.test(cta.type||c.call_to_action_type||'')){add('WhatsApp',cv.link||cv.whatsapp_number?('https://wa.me/'+String(cv.whatsapp_number||'').replace(/\D/g,'')):'whatsapp:')}
+  if(cv.link&&!/facebook\.com\/?$/.test(cv.link))add('Link do botão',tags(cv.link));
+  if(ld.link&&!fid)add('Link do anúncio',tags(ld.link));
+  (ld.child_attachments||[]).forEach((x,i)=>add('Cartão '+(i+1),tags(x.link)));
+  ((c.asset_feed_spec||{}).link_urls||[]).forEach(x=>add('Link',tags(x.website_url)));
+  if(c.link_url)add('Link',tags(c.link_url));
+  return out;
+}
+function linkBtns(a,compact){
+  const ls=adLinks(a.creative);
+  const btn=x=>x.u.startsWith('form:')?`<span class="pill p-mut" title="Abre o formulário dentro do Facebook/Instagram">Formulário</span>`:x.u==='whatsapp:'?'<span class="pill p-mut">WhatsApp</span>':`<a href="${esc(x.u)}" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Testar link</button></a>`;
+  const host=x=>{if(x.u.startsWith('form:'))return 'Formulário instantâneo';try{return new URL(x.u).hostname.replace(/^www\./,'')}catch(e){return x.u}};
+  return `${ls.length?ls.map(x=>`<div class="dest"><div style="min-width:0"><div class="lead-sub">${esc(x.l)}</div><div class="dest-url" title="${esc(x.u)}">${esc(x.u.startsWith('form:')?'Formulário instantâneo · ID '+x.u.slice(5):compact?host(x):x.u)}</div></div>${btn(x)}</div>`).join(''):'<span class="lead-sub">Sem link de destino</span>'}
+   ${a.preview_shareable_link?`<a href="${esc(a.preview_shareable_link)}" target="_blank" rel="noopener" class="lead-sub">Ver prévia do anúncio ↗</a>`:''}`;
+}
+const showCampLinks=guard(async(id,name)=>{
+  $('modalRoot').innerHTML=`<div class="modal" role="dialog" aria-modal="true"><div class="box" style="max-width:680px;max-height:85vh;overflow:auto"><h2>Destinos: ${esc(name)}</h2><div id="clBody" class="muted" style="margin-top:10px">Buscando anúncios…</div><div class="actions"><button onclick="closeModal()">Fechar</button></div></div></div>`;
+  const ads=S.demo?DEMO.ads.slice(0,2):await all(`${id}/ads`,{fields:'name,effective_status,preview_shareable_link,creative{link_url,url_tags,call_to_action_type,object_story_spec,asset_feed_spec}'},100);
+  $('clBody').classList.remove('muted');
+  $('clBody').innerHTML=ads.map(a=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><b>${esc(a.name)}</b>${statusPill(a.effective_status)}</div>${linkBtns(a,false)}</div>`).join('')||'Esta campanha não tem anúncios.';
+});
+/* ---------- Ranking de criativos ---------- */
+async function getAds(){
+  if(S.demo)return DEMO.ads;
+  const k='ads'+S.period;if(S.cache[k])return S.cache[k];
+  return S.cache[k]=await all(`${S.acc.id}/ads`,{fields:`name,status,effective_status,preview_shareable_link,campaign{name},creative{thumbnail_url,image_url,title,body,link_url,url_tags,call_to_action_type,object_story_spec,asset_feed_spec},insights.date_preset(${S.period}){spend,impressions,inline_link_clicks,ctr,actions}`},400);
+}
+const tCreatives=guard(async()=>{
+  const m=store.get('cm_crmetric')||'lead';
+  const ads=(await getAds()).map(a=>{const i=(a.insights&&a.insights.data&&a.insights.data[0])||{},sp=Number(i.spend||0);
+    const r=m==='buy'?act(i.actions,PURCHASE):act(i.actions,LEAD);return{a,sp,r,cost:r?sp/r:Infinity,ctr:Number(i.ctr||0),clk:Number(i.inline_link_clicks||0),imp:Number(i.impressions||0)}}).filter(x=>x.sp>0||x.a.effective_status==='ACTIVE');
+  if(m==='ctr')ads.sort((x,y)=>y.ctr-x.ctr);else ads.sort((x,y)=>x.cost-y.cost||y.sp-x.sp);
+  const withR=ads.filter(x=>m==='ctr'?x.imp>0:x.r>0),n=withR.length;
+  const tag=(x,idx)=>{if(m!=='ctr'&&!x.r)return x.sp>0?'<span class="pill p-bad">Sem resultado</span>':'';if(n>=3&&idx<Math.min(3,Math.ceil(n/3)))return '<span class="pill p-good">Melhor</span>';if(n>=3&&idx>=n-Math.min(3,Math.ceil(n/3)))return '<span class="pill p-warn">Pior</span>';return ''};
+  const lab=m==='buy'?'compra':'lead';
+  $('tabBody').innerHTML=`<div class="card" style="margin-top:0"><div class="card-h"><h2>Ranking de criativos</h2>
+    <div class="actions"><select id="crm" aria-label="Ordenar por" onchange="store.set('cm_crmetric',this.value);tCreatives()">
+      <option value="lead" ${m==='lead'?'selected':''}>Menor custo por lead</option><option value="buy" ${m==='buy'?'selected':''}>Menor custo por compra</option><option value="ctr" ${m==='ctr'?'selected':''}>Maior CTR</option></select></div></div>
+    <div class="tbl"><table><thead><tr><th>#</th><th>Criativo</th><th>Status</th><th class="r">Gasto</th><th class="r">${m==='buy'?'Compras':'Leads'}</th><th class="r">Custo/${lab}</th><th class="r">CTR</th><th class="r">Cliques</th><th>Destino</th><th></th></tr></thead><tbody>
+    ${ads.map((x,idx)=>{const c=x.a.creative||{},img=c.thumbnail_url||c.image_url;return `<tr>
+      <td class="num muted">${idx+1}</td>
+      <td style="min-width:240px"><div style="display:flex;gap:10px;align-items:center">${img?`<img src="${esc(img)}" alt="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;flex:none;background:var(--line)">`:'<div style="width:56px;height:56px;border-radius:8px;background:var(--line);flex:none"></div>'}
+        <div style="min-width:0"><b>${esc(x.a.name)}</b><div class="lead-sub">${esc((x.a.campaign||{}).name||'')}</div>${c.title?`<div class="lead-sub">${esc(c.title)}</div>`:''}<div style="margin-top:3px">${tag(x,idx)}</div></div></div></td>
+      <td>${statusPill(x.a.effective_status)}</td><td class="r num">${money(x.sp)}</td><td class="r num">${int(x.r)}</td>
+      <td class="r num">${x.r?money(x.cost):'—'}</td><td class="r num">${x.ctr?pct(x.ctr):'—'}</td><td class="r num">${int(x.clk)}</td>
+      <td style="min-width:200px;max-width:260px">${linkBtns(x.a,true)}</td>
+      <td>${x.a.status==='ACTIVE'?`<button class="sm danger" data-n="${esc(x.a.name)}" onclick="toggleAd('${x.a.id}','PAUSED',this.dataset.n)">Pausar</button>`:x.a.status==='PAUSED'?`<button class="sm" data-n="${esc(x.a.name)}" onclick="toggleAd('${x.a.id}','ACTIVE',this.dataset.n)">Ativar</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="10" class="muted">Nenhum anúncio com gasto neste período.</td></tr>'}
+    </tbody></table></div>
+    <div class="note">"Melhor" e "Pior" comparam só os anúncios que tiveram resultado no período. Pausar um anúncio não mexe no resto da campanha.</div></div>`;
+});
+function toggleAd(id,st,name){
+  confirmBox(st==='PAUSED'?'Pausar anúncio?':'Ativar anúncio?',`<b>${esc(name)}</b> vai ${st==='PAUSED'?'parar de veicular agora':'voltar a veicular'}.`,st==='PAUSED'?'Pausar':'Ativar',async()=>{
+    if(S.demo){const a=DEMO.ads.find(x=>x.id===id);a.status=a.effective_status=st;toast('Exemplo atualizado');return tCreatives()}
+    try{await api(id,{status:st},'POST');toast(st==='PAUSED'?'Anúncio pausado':'Anúncio ativado');delete S.cache['ads'+S.period];tCreatives()}catch(e){showErr('appErr',e.message)}
+  },st==='PAUSED');
+}
+
+/* ---------- Funil de atendimento ---------- */
+const STG={novo:['Novo','p-mut'],chamado:['Chamado','p-warn'],negociando:['Negociando','p-warn'],fechou:['Fechou','p-good'],perdido:['Perdido','p-bad']};
+const getCrm=()=>{try{return JSON.parse(store.get('cm_crm')||'{}')}catch(e){return{}}};
+function crmOf(id){const c=getCrm()[id];if(c)return c;return getDone()[id]?{s:'chamado'}:{s:'novo'}}
+function setStage(id,s){const c=getCrm();c[id]={...(c[id]||{}),s,t:Date.now()};store.set('cm_crm',JSON.stringify(c));renderLeads()}
+function setValue(id,v){const c=getCrm();c[id]={...(c[id]||{s:'fechou'}),v:Number(String(v).replace(',','.'))||0};store.set('cm_crm',JSON.stringify(c));renderFunnel()}
+let CAMP_SPEND={};
+async function loadCampSpend(){try{const cs=await getCampaigns();CAMP_SPEND={};cs.forEach(c=>{const i=(c.insights&&c.insights.data&&c.insights.data[0])||{};CAMP_SPEND[c.name]=Number(i.spend||0)})}catch(e){}renderFunnel()}
+function renderFunnel(){
+  const el=$('funnelBox');if(!el)return;
+  const cnt={novo:0,chamado:0,negociando:0,fechou:0,perdido:0},by={};let rec=0;
+  LEADS.forEach(l=>{const c=crmOf(l.id);cnt[c.s]++;const k=l.camp||'Sem campanha';by[k]=by[k]||{n:0,f:0,v:0};by[k].n++;if(c.s==='fechou'){by[k].f++;by[k].v+=c.v||0;rec+=c.v||0}});
+  const tot=LEADS.length||1;
+  el.innerHTML=`<div class="card"><div class="card-h"><h2>Funil de atendimento</h2><span class="muted" style="font-size:13px">Receita fechada: <b class="num" style="color:var(--good)">${money(rec)}</b></span></div>
+    <div class="funnel">${Object.entries(STG).map(([k,[t]])=>`<div class="fstep fs-${k}"><div class="l">${t}</div><div class="v num">${cnt[k]}</div><div class="lead-sub">${Math.round(cnt[k]/tot*100)}%</div></div>`).join('')}</div>
+    <div class="tbl" style="margin-top:12px"><table><thead><tr><th>Campanha</th><th class="r">Leads</th><th class="r">Fechados</th><th class="r">Conversão</th><th class="r">Receita</th><th class="r">Gasto</th><th class="r">Retorno</th></tr></thead><tbody>
+    ${Object.entries(by).sort((a,b)=>b[1].v-a[1].v||b[1].n-a[1].n).map(([k,x])=>{const sp=CAMP_SPEND[k];return `<tr><td>${esc(k)}</td><td class="r num">${x.n}</td><td class="r num">${x.f}</td><td class="r num">${pct(x.f/x.n*100)}</td><td class="r num">${money(x.v)}</td><td class="r num">${sp!=null?money(sp):'—'}</td><td class="r num">${sp?`<b style="color:${x.v>=sp?'var(--good)':'var(--bad)'}">${(x.v/sp).toLocaleString('pt-BR',{maximumFractionDigits:2})}x</b>`:'—'}</td></tr>`}).join('')}
+    </tbody></table></div>
+    <div class="note">Mude a etapa de cada lead na tabela abaixo. Em "Fechou", informe o valor da venda para calcular o retorno real de cada campanha. O gasto é o do período escolhido no topo.</div></div>`;
+}
+function renderLeads(){
+  const q=($('leadQ')&&$('leadQ').value||'').toLowerCase(),fs=($('leadStage')&&$('leadStage').value)||'';
+  const list=LEADS.filter(l=>(!q||JSON.stringify(l).toLowerCase().includes(q))&&(!fs||crmOf(l.id).s===fs));
+  const msg=n=>encodeURIComponent(($('waMsg')?$('waMsg').value:'').replace(/\{nome\}/g,(n||'').split(' ')[0]));
+  $('leadsBox').innerHTML=`<div id="funnelBox"></div><div class="card"><div class="card-h"><h2>${LEADS.length} leads</h2>
+  <div class="actions"><input id="leadQ" placeholder="Buscar nome, telefone, e-mail" value="${esc(q)}" aria-label="Buscar leads">
+  <select id="leadStage" aria-label="Filtrar etapa"><option value="">Todas as etapas</option>${Object.entries(STG).map(([k,[t]])=>`<option value="${k}" ${fs===k?'selected':''}>${t}</option>`).join('')}</select>
+  <button onclick="exportCsv()">Baixar CSV</button></div></div>
+  <div class="tbl"><table><thead><tr><th>Lead</th><th>Etapa</th><th>Contato</th><th>Origem</th><th>Respostas</th><th>Ações</th></tr></thead><tbody>
+  ${list.map(l=>{const wa=waNumber(l.tel),ig=igHandle(l.ig),c=crmOf(l.id);const extra=Object.entries(l.m).filter(([k])=>!/full_name|phone|email|nome|telefone/i.test(k));return `<tr>
+   <td style="min-width:150px"><b>${esc(l.nome)}</b><div class="lead-sub">${dt(l.time)}</div></td>
+   <td style="min-width:140px"><select aria-label="Etapa" class="stage st-${c.s}" onchange="setStage('${l.id}',this.value)">${Object.entries(STG).map(([k,[t]])=>`<option value="${k}" ${c.s===k?'selected':''}>${t}</option>`).join('')}</select>
+     ${c.s==='fechou'?`<input aria-label="Valor da venda" placeholder="Valor R$" value="${c.v||''}" onchange="setValue('${l.id}',this.value)" style="width:110px;margin-top:6px">`:''}</td>
+   <td style="min-width:170px"><div class="mono" style="font-size:13px">${esc(l.tel||'—')}</div><div class="lead-sub">${esc(l.email||'')}</div>${ig?`<div class="lead-sub">@${esc(ig)}</div>`:''}</td>
+   <td style="min-width:150px"><div style="font-size:13px">${esc(l.form)}</div><div class="lead-sub">${esc(l.camp)}${l.plat?' · '+(l.plat==='ig'?'Instagram':'Facebook'):''}</div></td>
+   <td style="min-width:180px;font-size:13px">${extra.map(([k,v])=>`<div><span class="muted">${esc(k.replace(/_/g,' '))}:</span> ${esc(v)}</div>`).join('')||'<span class="muted">—</span>'}</td>
+   <td><div class="actions">
+     ${wa?`<a href="https://wa.me/${wa}?text=${msg(l.nome)}" target="_blank" rel="noopener" onclick="if(crmOf('${l.id}').s==='novo')setTimeout(()=>setStage('${l.id}','chamado'),300)"><button class="sm wa" tabindex="-1">WhatsApp</button></a>`:''}
+     ${ig?`<a href="https://instagram.com/${encodeURIComponent(ig)}" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Instagram</button></a>`:`<a href="https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(l.nome)}" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Buscar no IG</button></a>`}
+     ${l.email?`<a href="mailto:${encodeURIComponent(l.email)}"><button class="sm" tabindex="-1">E-mail</button></a>`:''}
+   </div></td></tr>`}).join('')||'<tr><td colspan="6" class="muted">Nenhum lead encontrado.</td></tr>'}
+  </tbody></table></div>
+  <div class="note">Ao tocar em WhatsApp, o lead passa sozinho de "Novo" para "Chamado". A Meta não permite responder o formulário pela API: o atendimento é pelo contato que a pessoa deixou.</div></div>`;
+  $('leadQ').oninput=()=>{const p=$('leadQ').selectionStart;renderLeads();$('leadQ').focus();$('leadQ').setSelectionRange(p,p)};
+  $('leadStage').onchange=renderLeads;
+  renderFunnel();
+}
+function exportCsv(){
+  const keys=[...new Set(LEADS.flatMap(l=>Object.keys(l.m)))];
+  const head=['data','formulario','campanha','plataforma','etapa','valor_venda',...keys];
+  const q=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+  const csv=[head.map(q).join(';'),...LEADS.map(l=>[l.time,l.form,l.camp,l.plat,STG[crmOf(l.id).s][0],crmOf(l.id).v||'',...keys.map(k=>l.m[k]||'')].map(q).join(';'))].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));a.download='leads-meta.csv';a.click();
+}
+
+/* ---------- Páginas e Instagram ---------- */
+const tInstagram=guard(async()=>{
+  const pages=await getPages();
+  $('tabBody').innerHTML=`<div class="grid2">${pages.map(p=>{const ig=p.instagram_business_account;return `<div class="card" style="margin-top:0">
+    <h2>${esc(p.name)}</h2><div class="lead-sub">${esc(p.category||'')} · <span class="mono">${p.id}</span>${p.fan_count?' · '+int(p.fan_count)+' seguidores':''}</div>
+    ${ig?`<div class="ig" style="margin-top:12px">${ig.profile_picture_url?`<img src="${esc(ig.profile_picture_url)}" alt="">`:'<img alt="">'}<div><b>@${esc(ig.username)}</b><div class="lead-sub">${int(ig.followers_count)} seguidores · ${int(ig.media_count)} posts</div></div></div>`:'<p class="muted" style="font-size:14px">Nenhum Instagram profissional conectado a esta página.</p>'}
+    <div class="actions" style="margin-top:12px">
+      <a href="https://facebook.com/${p.id}" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Página</button></a>
+      ${ig?`<a href="https://instagram.com/${encodeURIComponent(ig.username)}" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Abrir Instagram</button></a>`:''}
+      <a href="https://business.facebook.com/latest/inbox/all?asset_id=${p.id}" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Caixa de entrada (Direct e Messenger)</button></a>
+    </div></div>`}).join('')||'<div class="card muted">Nenhuma página encontrada.</div>'}</div>`;
+});
+
+/* ---------- BMs e contas ---------- */
+const tBms=guard(async()=>{
+  const bms=await getBms();
+  $('tabBody').innerHTML=`<div class="card"><div class="card-h"><h2>Gerenciadores de negócios (BMs)</h2></div>
+  <div class="tbl"><table><thead><tr><th>BM</th><th>Verificação</th><th>Criada</th><th></th></tr></thead><tbody>
+  ${bms.map(b=>`<tr><td><b>${esc(b.name)}</b><div class="lead-sub mono">${b.id}</div></td><td>${b.verification_status==='verified'?'<span class="pill p-good">Verificada</span>':b.verification_status==='pending_submission'||b.verification_status==='pending'?'<span class="pill p-warn">Verificação em análise</span>':b.verification_status==='rejected'||b.verification_status==='failed'?'<span class="pill p-bad">Verificação recusada</span>':'<span class="pill p-mut">Ativa · não verificada</span>'}</td><td class="num">${dt(b.created_time)}</td><td><a href="https://business.facebook.com/settings/?business_id=${b.id}" target="_blank" rel="noopener">Configurações</a></td></tr>`).join('')||'<tr><td colspan="4" class="muted">Nenhuma BM encontrada.</td></tr>'}
+  </tbody></table></div></div>
+  ${limitsByBm()}`;
+});
+
+/* ---------- Nova campanha: descrição → rascunho → revisão → publicação ---------- */
+const OBJ={
+  SALES:{l:'Vendas',api:'OUTCOME_SALES',opt:'OFFSITE_CONVERSIONS',ev:'PURCHASE',cta:'SHOP_NOW'},
+  LEADS:{l:'Cadastros (formulário instantâneo)',api:'OUTCOME_LEADS',opt:'LEAD_GENERATION',cta:'SIGN_UP'},
+  TRAFFIC:{l:'Tráfego para o site',api:'OUTCOME_TRAFFIC',opt:'LINK_CLICKS',cta:'LEARN_MORE'},
+  AWARENESS:{l:'Reconhecimento / alcance',api:'OUTCOME_AWARENESS',opt:'REACH',cta:'LEARN_MORE'}};
+const CTAS={SHOP_NOW:'Comprar agora',BUY_NOW:'Comprar',GET_OFFER:'Obter oferta',SIGN_UP:'Cadastre-se',LEARN_MORE:'Saiba mais',CONTACT_US:'Fale conosco'};
+const DEFAULT_ACC='', DEFAULT_BM='';
+const draftsKey='cm_drafts';
+const getDrafts=()=>{try{return JSON.parse(store.get(draftsKey)||'[]')}catch(e){return[]}};
+const saveDrafts=d=>store.set(draftsKey,JSON.stringify(d.slice(0,30)));
+
+function parseBrief(t){
+  const s=t.toLowerCase(),o={};
+  o.obj=/lead|cadastr|formul|contato/.test(s)?'LEADS':/tr[aá]fego|visita|cliques|acess/.test(s)?'TRAFFIC':/alcance|reconhec|divulga[çc][aã]o|marca/.test(s)?'AWARENESS':'SALES';
+  const b=s.match(/(?:r\$\s*|or[çc]amento[^\d]{0,30})(\d+(?:[.,]\d{1,2})?)/)||s.match(/(\d+(?:[.,]\d{1,2})?)\s*(?:reais|real)/);
+  o.budget=b?Number(b[1].replace(',','.')):30;
+  o.btype=/total|no total|vital/.test(s)&&!/por dia|di[aá]rio/.test(s)?'lifetime':'daily';
+  const d=s.match(/(\d+)\s*dias?/); o.days=d?Number(d[1]):(o.btype==='lifetime'?7:0);
+  const a=s.match(/(\d{2})\s*(?:a|até|ate|-|e)\s*(\d{2})\s*anos/); o.amin=a?Number(a[1]):18; o.amax=a?Number(a[2]):65;
+  o.gender=/\bmulher|feminin/.test(s)&&!/\bhomen|\bhomem|masculin/.test(s)?'2':/\bhomen|\bhomem|masculin/.test(s)&&!/\bmulher|feminin/.test(s)?'1':'';
+  const u=t.match(/https?:\/\/[^\s,;]+|www\.[^\s,;]+/i); o.link=u?(u[0].startsWith('http')?u[0]:'https://'+u[0]):'';
+  const p=t.match(/(?:vender|vendas? d[eoa]s?|divulgar|promover|anunciar|promo[çc][aã]o d[eoa]s?)\s+(?:o |a |os |as |meu |minha |meus |minhas |nosso |nossa )?([^,.;\n]+?)(?=\s+(?:com|que|por|para|pra|no|na|em|durante|e or[çc]amento|at[eé])\b|[,.;\n]|$)/i);
+  o.product=p?p[1].trim():'';
+  const c=t.match(/\b(?:em|na cidade de|para a cidade de)\s+((?:S[ãa]o|Santo|Santa|Rio|Belo|Porto|Campo|Ribeir[ãa]o|[A-ZÁÉÍÓÚÂÊÔÃÕ][a-zà-ú]+)(?:\s+(?:d[aeo]s?\s+)?[A-ZÁÉÍÓÚÂÊÔÃÕ][a-zà-ú]+)*)/);
+  o.city=c&&!/^Brasil$/i.test(c[1])?c[1]:'';
+  o.raio=(s.match(/(\d+)\s*km/)||[])[1]||'25';
+  const prod=o.product||'nosso produto';
+  o.name=`${OBJ[o.obj].l.split(' ')[0]} · ${prod}${o.city?' · '+o.city:''} · ${new Date().toLocaleDateString('pt-BR')}`;
+  o.headline=o.obj==='LEADS'?`Cadastre-se: ${prod}`:o.obj==='SALES'?`${prod[0].toUpperCase()+prod.slice(1)} com condição especial`:`Conheça ${prod}`;
+  o.text=o.obj==='LEADS'?`Quer saber mais sobre ${prod}? Deixe seu contato e falamos com você pelo WhatsApp.`:o.obj==='SALES'?`${prod[0].toUpperCase()+prod.slice(1)} disponível agora. Garanta o seu pelo link e aproveite enquanto durar.`:`Descubra ${prod}. Toque no link e saiba mais.`;
+  o.cta=OBJ[o.obj].cta;
+  return o;
+}
+
+const tCreate=guard(async()=>{
+  const [pages,pixels]=await Promise.all([getPages().catch(()=>[]),getPixels().catch(()=>[])]);
+  const drafts=getDrafts().filter(d=>d.acc===S.acc.id);
+  $('tabBody').innerHTML=`
+  <div class="card" style="margin-top:0"><div class="card-h"><h2>Descreva a campanha</h2><span class="muted" style="font-size:13px">Conta: ${esc(S.acc.name)}</span></div>
+    <textarea id="nc_brief" style="min-height:90px" placeholder="Ex.: Campanha de vendas do produto X, orçamento de R$ 50 por dia por 10 dias, público de 18 a 45 anos em São Paulo, link https://seusite.com.br/oferta">${esc(store.get('cm_brief')||'')}</textarea>
+    <div class="actions" style="margin-top:10px"><button class="primary" onclick="fillFromBrief()">Montar rascunho</button>
+      <button class="sm" onclick="$('nc_brief').value='Campanha de cadastros para a promoção de fim de ano, R$ 40 por dia durante 7 dias, mulheres e homens de 25 a 50 anos em São Paulo';fillFromBrief()">Exemplo cadastro</button>
+      <button class="sm" onclick="$('nc_brief').value='Vender o curso de gestão de tráfego com orçamento total de R$ 700 por 14 dias, público de 18 a 55 anos, link https://seusite.com.br/oferta';fillFromBrief()">Exemplo vendas</button></div>
+    <div class="note">O painel lê objetivo, orçamento, duração, idade, sexo, cidade e link da sua descrição e preenche os campos abaixo. Confira tudo antes de criar. Tudo é criado <b>pausado</b>: não gasta nada até você publicar.</div>
+  </div>
+
+  <div class="card" id="nc_form" hidden>
+    <h2>Rascunho</h2>
+    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 8px">Campanha</h3>
+    <div class="grid2">
+      <div class="field"><label for="nc_name">Nome</label><input id="nc_name"></div>
+      <div class="field"><label for="nc_obj">Objetivo</label><select id="nc_obj" onchange="ncObjChange()">${Object.entries(OBJ).map(([k,v])=>`<option value="${k}">${v.l}</option>`).join('')}</select></div>
+    </div>
+    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 8px">Orçamento e público</h3>
+    <div class="grid2">
+      <div class="field"><label for="nc_btype">Tipo de orçamento</label><select id="nc_btype"><option value="daily">Diário</option><option value="lifetime">Total (vitalício)</option></select></div>
+      <div class="field"><label for="nc_budget">Valor (R$)</label><input id="nc_budget" type="number" min="5" step="1"></div>
+      <div class="field"><label for="nc_start">Início</label><input id="nc_start" type="datetime-local"></div>
+      <div class="field"><label for="nc_end">Término (obrigatório no orçamento total)</label><input id="nc_end" type="datetime-local"></div>
+      <div class="field"><label for="nc_amin">Idade mínima</label><input id="nc_amin" type="number" min="18" max="65"></div>
+      <div class="field"><label for="nc_amax">Idade máxima</label><input id="nc_amax" type="number" min="18" max="65"></div>
+      <div class="field"><label for="nc_gender">Sexo</label><select id="nc_gender"><option value="">Todos</option><option value="2">Mulheres</option><option value="1">Homens</option></select></div>
+      <div class="field"><label for="nc_city">Cidade (vazio = Brasil todo)</label><input id="nc_city" placeholder="São Paulo"></div>
+      <div class="field"><label for="nc_raio">Raio em km</label><input id="nc_raio" type="number" min="17" max="80"></div>
+      <div class="field" id="nc_pxBox"><label for="nc_px">Pixel (vendas)</label><select id="nc_px">${pixels.map(p=>`<option value="${p.id}">${esc(p.name)} · ${p.id}</option>`).join('')||'<option value="">Nenhum pixel nesta conta</option>'}</select></div>
+    </div>
+    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 8px">Anúncio</h3>
+    <div class="grid2">
+      <div class="field"><label for="nc_page">Página do Facebook</label><select id="nc_page" onchange="ncLoadForms()">${pages.map(p=>`<option value="${p.id}">${esc(p.name)}${p.instagram_business_account?' · @'+esc(p.instagram_business_account.username):''}</option>`).join('')||'<option value="">Nenhuma página</option>'}</select></div>
+      <div class="field" id="nc_formBox"><label for="nc_lf">Formulário instantâneo</label><select id="nc_lf"><option value="">Carregando…</option></select></div>
+      <div class="field" id="nc_linkBox"><label for="nc_link">Link de destino</label><input id="nc_link" placeholder="https://"></div>
+      <div class="field"><label for="nc_cta">Botão</label><select id="nc_cta">${Object.entries(CTAS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></div>
+      <div class="field"><label for="nc_head">Título</label><input id="nc_head" maxlength="60"></div>
+      <div class="field"><label for="nc_img">Imagem do anúncio (JPG ou PNG, 1080×1080)</label><input id="nc_img" type="file" accept="image/png,image/jpeg"></div>
+    </div>
+    <div class="field" style="margin-top:12px"><label for="nc_text">Texto principal</label><textarea id="nc_text"></textarea></div>
+    <div class="note">Sem imagem, o painel cria só a campanha e o conjunto. Você adiciona o anúncio depois no Gerenciador.</div>
+    <div class="actions" style="margin-top:14px"><button class="primary" onclick="createDraft()">Criar rascunho pausado</button></div>
+    <div id="nc_log"></div>
+  </div>
+
+  <div id="nc_review"></div>
+
+  <div class="card" id="pasteCard"><div class="card-h"><h2>Copiar campanha com todas as configurações</h2><span class="muted" style="font-size:13px">Abre a original, você ajusta e sobe em qualquer conta ou BM</span></div>
+    <div class="grid2"><div class="field"><label for="ps_src">Campanha de origem (conta ${esc(S.acc.name)})</label><select id="ps_src"><option value="">Carregando campanhas…</option></select></div>
+      <div class="field"><label>&nbsp;</label><div class="actions"><button class="primary" onclick="psOpenSource()">Abrir campanha</button></div></div></div>
+    <div class="field" style="margin-top:6px"><label for="ps_json">Ou cole uma campanha copiada</label><textarea id="ps_json" style="min-height:70px;font-family:var(--f-mono);font-size:12px" placeholder="Clique em Copiar na aba Campanhas, ou cole aqui um arquivo de campanha copiada.">${esc(store.get('cm_clip')||'')}</textarea></div>
+    <div id="ps_sum" class="lead-sub" style="margin-top:6px"></div>
+    <div class="grid2" style="margin-top:10px">
+      <div class="field"><label for="ps_tok">Token de outro perfil (só se a outra BM estiver em outro Facebook)</label><input id="ps_tok" placeholder="Deixe vazio para usar o perfil conectado"></div>
+      <div class="field"><label for="ps_acc">Conta de destino</label><select id="ps_acc" onchange="if(psPkg())psPrepare()">${S.accounts.map(a=>`<option value="${a.id}">${esc(a.name)} · ${a.account_id}${a.business?' · '+esc(a.business.name):''}</option>`).join('')}</select></div>
+    </div>
+    <div class="actions" style="margin-top:10px"><button onclick="psLoadAccounts()">Carregar contas do outro token</button><button class="primary" onclick="psPrepare()">Preparar cópia</button></div>
+    <div id="ps_map"></div><div id="ps_log"></div>
+  </div>
+
+  <div class="card"><div class="card-h"><h2>Rascunhos criados por aqui</h2></div>
+    ${drafts.length?`<div class="tbl"><table><thead><tr><th>Campanha</th><th>Criado</th><th></th></tr></thead><tbody>${drafts.map(d=>`<tr><td><b>${esc(d.name)}</b><div class="lead-sub mono">${d.camp}</div></td><td class="num">${dt(d.at)}</td><td><button class="sm" onclick="reviewDraft('${d.camp}')">Revisar</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted" style="font-size:14px">Nenhum rascunho ainda. Descreva uma campanha acima para criar o primeiro.</p>'}
+  </div>`;
+  $('nc_brief').oninput=e=>store.set('cm_brief',e.target.value);
+  $('ps_json').oninput=psSummary;psSummary();
+  psLoadSources();
+});
+
+/* ---------- Copiar e colar campanha entre contas/BMs ---------- */
+function collectMedia(o,imgs,vids){
+  if(!o||typeof o!=='object')return;
+  for(const [k,v] of Object.entries(o)){
+    if((k==='image_hash'||(k==='hash'&&typeof v==='string'))&&v)imgs.add(v);
+    else if(k==='video_id'&&v)vids.add(String(v));
+    else if(typeof v==='object')collectMedia(v,imgs,vids);
+  }
+}
+/* Campos lidos da campanha original. Se a versão da API não conhecer algum, ele sai da lista e a leitura segue. */
+const PK_CAMP='name,objective,special_ad_categories,special_ad_category_country,bid_strategy,daily_budget,lifetime_budget,spend_cap,buying_type,pacing_type,promoted_object';
+const PK_SET='id,name,status,daily_budget,lifetime_budget,optimization_goal,optimization_sub_event,billing_event,bid_strategy,bid_amount,bid_constraints,targeting,promoted_object,destination_type,start_time,end_time,attribution_spec,pacing_type,frequency_control_specs,is_dynamic_creative,multi_optimization_goal_weight,adset_schedule,daily_min_spend_target,daily_spend_cap,lifetime_min_spend_target,lifetime_spend_cap,dsa_beneficiary,dsa_payor,regional_regulated_categories,regional_regulation_identities';
+const PK_CR='name,object_story_spec,asset_feed_spec,degrees_of_freedom_spec,contextual_multi_ads,url_tags,object_story_id,effective_object_story_id,call_to_action_type,platform_customizations,product_set_id';
+async function withFields(fn,fields){
+  let f=fields.split(',');
+  for(let i=0;i<12;i++){
+    try{return await fn(f.join(','))}
+    catch(e){const m=/nonexisting field \(([^)]+)\)|field \(?([a-z_]+)\)? (?:is|does) not/i.exec(e.message);const bad=m&&(m[1]||m[2]);if(!bad||!f.includes(bad))throw e;f=f.filter(x=>x!==bad)}
+  }
+}
+async function buildPackage(id){
+  const c=await withFields(f=>api(id,{fields:f}),PK_CAMP);
+  const sets=await withFields(f=>all(`${id}/adsets`,{fields:f},200),PK_SET);
+  const ads=await withFields(f=>all(`${id}/ads`,{fields:`name,adset_id,status,tracking_specs,conversion_domain,creative{${f}}`},500),PK_CR);
+  const imgs=new Set(),vids=new Set();ads.forEach(a=>collectMedia(a.creative,imgs,vids));
+  /* Guarda o endereço de cada imagem: se a conta de destino não puder copiar a imagem, o anúncio usa o endereço */
+  const imgUrls={};
+  if(imgs.size){try{const r=await api(`${S.acc.id}/adimages`,{hashes:JSON.stringify([...imgs]),fields:'hash,url,permalink_url'});(r.data||[]).forEach(x=>imgUrls[x.hash]=x.permalink_url||x.url)}catch(e){}}
+  const names={};const ids=new Set();const waNums=new Set();
+  sets.forEach(s=>{const po=s.promoted_object||{};if(po.pixel_id)ids.add(po.pixel_id);if(po.page_id)ids.add(po.page_id);if(po.whatsapp_phone_number)waNums.add(String(po.whatsapp_phone_number))});
+  ads.forEach(a=>{const o=(a.creative||{}).object_story_spec||{};if(o.page_id)ids.add(o.page_id);JSON.stringify(a.creative||{}).replace(/"lead_gen_form_id":"?(\d+)/g,(_,f)=>ids.add(f)).replace(/"whatsapp_number":"?\+?(\d+)/g,(_,n)=>waNums.add(n))});
+  for(const x of ids){try{const r=await api(x,{fields:'name,owner_business{id}'});names[x]={name:r.name,owner:r.owner_business&&r.owner_business.id}}catch(e){try{const r=await api(x,{fields:'name'});names[x]={name:r.name}}catch(e2){}}}
+  return {v:1,copiedAt:new Date().toISOString(),source:{acc:S.acc.id,account_id:S.acc.account_id,name:S.acc.name},names,
+    campaign:c,adsets:sets.map(s=>({...s,ads:ads.filter(a=>a.adset_id===s.id).map(a=>({name:a.name,status:a.status,tracking_specs:a.tracking_specs,conversion_domain:a.conversion_domain,creative:a.creative}))})),
+    images:[...imgs],imgUrls,videos:[...vids],waNums:[...waNums]};
+}
+/* Erros da cópia aparecem no próprio cartão, sem apagar a tela */
+const psGuard=fn=>async(...a)=>{try{await fn(...a)}catch(e){const l=$('ps_log');if(l)l.insertAdjacentHTML('beforeend',`<div class="note" style="color:var(--bad)">Parou aqui: ${esc(e.message)}</div>`);else showErr('appErr',e.message)}};
+const copyCampaign=guard(async id=>{
+  if(S.demo)return toast('Exemplo: conecte um token para copiar campanhas reais');
+  toast('Copiando estrutura da campanha…');
+  const pkg=await buildPackage(id);const txt=JSON.stringify(pkg);
+  store.set('cm_clip',txt);
+  try{await navigator.clipboard.writeText(txt)}catch(e){}
+  const nAds=pkg.adsets.reduce((a,s)=>a+s.ads.length,0);
+  confirmBox('Campanha copiada',`<b>${esc(pkg.campaign.name)}</b>: ${pkg.adsets.length} conjunto(s) e ${nAds} anúncio(s). Para subir em outra BM, vá na aba <b>Nova campanha</b> e use "Colar campanha copiada". Também copiei para a área de transferência, se quiser colar em outro computador.`,'Escolher conta de destino',async()=>{document.querySelector('[data-t=create]').click();setTimeout(()=>{const c=$('pasteCard');if(c){c.scrollIntoView({behavior:'smooth',block:'start'});if(psPkg())psPrepare()}},900)});
+});
+function dupHere(id,name){
+  confirmBox('Duplicar nesta conta?',`Cria uma cópia completa de <b>${esc(name)}</b> (conjuntos e anúncios) nesta mesma conta, pausada.`,'Duplicar',async()=>{
+    if(S.demo)return toast('Exemplo: nada foi criado');
+    try{const r=await api(`${id}/copies`,{deep_copy:'true',status_option:'PAUSED',rename_options:JSON.stringify({rename_suffix:' (cópia)'})},'POST');toast('Cópia criada, pausada');delete S.cache['cp'+S.period];tCampaigns()}
+    catch(e){showErr('appErr',e.message+' Se a campanha for grande, use Copiar e depois Colar nesta mesma conta.')}
+  });
+}
+function psPkg(){try{const p=JSON.parse($('ps_json').value);return p&&p.v===1&&p.campaign?p:null}catch(e){return null}}
+function psSummary(){const p=psPkg(),el=$('ps_sum');if(!el)return;if(!$('ps_json').value.trim()){el.textContent='';return}
+  el.innerHTML=p?`Campanha <b>${esc(p.campaign.name)}</b> de ${esc(p.source.name)}: ${p.adsets.length} conjunto(s), ${p.adsets.reduce((a,s)=>a+s.ads.length,0)} anúncio(s), ${p.images.length} imagem(ns), ${p.videos.length} vídeo(s). Copiada em ${dt(p.copiedAt)}.`:'<span style="color:var(--bad)">Isso não parece uma campanha copiada por este painel.</span>'}
+const psTok=()=>($('ps_tok').value.trim()||S.token);
+const psLoadAccounts=psGuard(async()=>{
+  if(!$('ps_tok').value.trim())return showErr('appErr','Cole o token do outro perfil primeiro.');
+  const accs=await all('me/adaccounts',{fields:'name,account_id,business{name}'},500,psTok());
+  $('ps_acc').innerHTML=accs.map(a=>`<option value="${a.id}">${esc(a.name)} · ${a.account_id}${a.business?' · '+esc(a.business.name):''}</option>`).join('');
+  toast(accs.length+' contas carregadas');
+});
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+function bestMatch(srcId,srcName,list){
+  if(list.find(x=>x.id===srcId))return srcId;
+  const n=norm(srcName);
+  const eq=list.find(x=>norm(x.name)===n);if(eq)return eq.id;
+  const part=n&&list.find(x=>norm(x.name).includes(n)||n.includes(norm(x.name)));if(part)return part.id;
+  return list.length?list[0].id:'';
+}
+/* ---------- Abrir campanha de origem e editar todas as configurações antes de copiar ---------- */
+async function psLoadSources(){
+  const el=$('ps_src');if(!el)return;
+  if(S.demo){el.innerHTML='<option value="">Conecte um token para listar campanhas</option>';return}
+  try{
+    const cs=await all(`${S.acc.id}/campaigns`,{fields:'name,effective_status,objective'},300);
+    const st={ACTIVE:'rodando',PAUSED:'pausada',WITH_ISSUES:'com problemas',CAMPAIGN_PAUSED:'pausada',ARCHIVED:'arquivada'};
+    el.innerHTML='<option value="">Escolha a campanha</option>'+cs.map(c=>`<option value="${c.id}">${esc(c.name)} · ${st[c.effective_status]||c.effective_status.toLowerCase()}</option>`).join('');
+  }catch(e){el.innerHTML=`<option value="">Não consegui listar: ${esc(e.message)}</option>`}
+}
+const psOpenSource=psGuard(async()=>{
+  const id=$('ps_src').value;if(!id)return showErr('appErr','Escolha a campanha de origem.');
+  $('ps_map').innerHTML='<p class="muted">Lendo todas as configurações da campanha…</p>';
+  const pkg=await buildPackage(id);const txt=JSON.stringify(pkg);
+  store.set('cm_clip',txt);$('ps_json').value=txt;psSummary();
+  await psPrepare();
+});
+const DESTS={ORIG:'Igual à original',WHATSAPP:'WhatsApp',MESSENGER:'Messenger',WEBSITE:'Site (link)'};
+const CTA_ALL={...CTAS,WHATSAPP_MESSAGE:'Enviar mensagem pelo WhatsApp',MESSAGE_PAGE:'Enviar mensagem',APPLY_NOW:'Candidate-se',SUBSCRIBE:'Assinar',DOWNLOAD:'Baixar',GET_QUOTE:'Solicitar orçamento',BOOK_TRAVEL:'Reservar',ORDER_NOW:'Pedir agora',WATCH_MORE:'Assistir mais',JOIN_CHANNEL:'Entrar no canal'};
+const POS_LBL={facebook:'Facebook',instagram:'Instagram',messenger:'Messenger',audience_network:'Audience Network',threads:'Threads'};
+const centsTxt=c=>c?(Number(c)/100).toFixed(2):'';
+const centsOf=v=>{const n=Number(String(v).replace(',','.'));return n>0?String(Math.round(n*100)):''};
+function origDest(p){const s=p.adsets[0]||{};const d=s.destination_type||'';
+  if(/WHATSAPP/.test(d))return 'WhatsApp';if(/MESSENGER/.test(d))return 'Messenger';if(d==='ON_AD')return 'Formulário instantâneo';if(/WEBSITE|UNDEFINED/.test(d)||!d)return 'Site';return d}
+function adFields(cr){
+  const o=(cr&&cr.object_story_spec)||{},ld=o.link_data,vd=o.video_data,af=cr&&cr.asset_feed_spec;
+  if(ld)return{kind:'link',msg:ld.message||'',head:ld.name||'',desc:ld.description||'',link:ld.link||'',cta:(ld.call_to_action||{}).type||''};
+  if(vd)return{kind:'video',msg:vd.message||'',head:vd.title||'',desc:vd.link_description||'',link:((vd.call_to_action||{}).value||{}).link||'',cta:(vd.call_to_action||{}).type||''};
+  if(af)return{kind:'feed',msg:(af.bodies||[]).map(x=>x.text).join('\n'),head:(af.titles||[]).map(x=>x.text).join('\n'),desc:(af.descriptions||[]).map(x=>x.text).join('\n'),link:((af.link_urls||[])[0]||{}).website_url||'',cta:(af.call_to_action_types||[])[0]||''};
+  return{kind:'post'};
+}
+function psEditorHtml(p){
+  const c=p.campaign,cbo=!!(c.daily_budget||c.lifetime_budget);
+  const sel=(id,obj,v)=>`<select id="${id}">${Object.entries(obj).map(([k,l])=>`<option value="${k}" ${k===v?'selected':''}>${esc(l)}</option>`).join('')}</select>`;
+  const H=t=>`<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 8px">${t}</h3>`;
+  let h=H('Configurações da cópia')+`<div class="note" style="margin-top:0">Tudo abaixo veio da campanha original. Mude o que quiser; o que não mudar fica igual.</div>
+   <div class="grid2">
+    <div class="field"><label for="pe_dest">Destino das conversas e cliques (original: ${esc(origDest(p))})</label>${sel('pe_dest',DESTS,'ORIG')}<div class="lead-sub">WhatsApp e Messenger mudam o objetivo para Engajamento → Conversas por mensagem, como no Gerenciador.</div></div>
+    <div class="field" id="pe_waBox"><label for="pe_wa">Número do WhatsApp de destino</label><input id="pe_wa" list="ps_waList" placeholder="5511999999999" value="${esc((S._ps&&S._ps.waNums&&S._ps.waNums[0]&&S._ps.waNums[0].num)||'')}"><div class="lead-sub">A página escolhida acima precisa estar ligada a este número (Página → Configurações → Contas vinculadas → WhatsApp).</div></div>
+    ${cbo?`<div class="field"><label for="pe_cbudget">Orçamento ${c.daily_budget?'diário':'total'} da campanha (R$)</label><input id="pe_cbudget" inputmode="decimal" value="${centsTxt(c.daily_budget||c.lifetime_budget)}"></div>`:''}
+    <div class="field"><label for="pe_spend">Limite de gastos da campanha (R$, opcional)</label><input id="pe_spend" inputmode="decimal" value="${centsTxt(c.spend_cap)}"></div>
+   </div>`;
+  p.adsets.forEach((s,i)=>{
+    const t=s.targeting||{},geo=t.geo_locations||{};
+    const extraGeo=[geo.regions&&geo.regions.length?geo.regions.length+' estado(s)':'',geo.cities&&geo.cities.length?geo.cities.length+' cidade(s)':'',geo.zips&&geo.zips.length?geo.zips.length+' CEP(s)':'',geo.custom_locations&&geo.custom_locations.length?geo.custom_locations.length+' raio(s)':''].filter(Boolean).join(', ');
+    const g=(t.genders||[]).join(',');const gv=g==='1'?'1':g==='2'?'2':'';
+    const pp=t.publisher_platforms||[];
+    const items=[];(t.flexible_spec||[]).forEach((grp,gi)=>Object.entries(grp).forEach(([k,arr])=>(Array.isArray(arr)?arr:[]).forEach((x,xi)=>items.push({path:`f:${gi}:${k}:${xi}`,name:x.name||x.id,kind:k}))));
+    Object.entries(t.exclusions||{}).forEach(([k,arr])=>(Array.isArray(arr)?arr:[]).forEach((x,xi)=>items.push({path:`x:${k}:${xi}`,name:'Excluir: '+(x.name||x.id),kind:k})));
+    const kinds={interests:'Interesse',behaviors:'Comportamento',work_positions:'Cargo',education_statuses:'Escolaridade',life_events:'Acontecimento',family_statuses:'Família',industries:'Setor',income:'Renda'};
+    h+=H(`Conjunto ${i+1}`)+`<div class="grid2">
+     <div class="field"><label for="pe_sn_${i}">Nome do conjunto</label><input id="pe_sn_${i}" value="${esc(s.name)}"></div>
+     ${cbo?'':`<div class="field"><label for="pe_sb_${i}">Orçamento ${Number(s.lifetime_budget)>0?'total':'diário'} (R$)</label><input id="pe_sb_${i}" inputmode="decimal" value="${centsTxt(Number(s.lifetime_budget)>0?s.lifetime_budget:s.daily_budget)}"></div>`}
+     <div class="field"><label for="pe_st_${i}">Início</label><input id="pe_st_${i}" type="datetime-local" value="${s.start_time&&new Date(s.start_time)>new Date()?toLocal(new Date(s.start_time)):''}"><div class="lead-sub">Vazio: começa 1 hora depois de você publicar.</div></div>
+     <div class="field"><label for="pe_en_${i}">Término (opcional)</label><input id="pe_en_${i}" type="datetime-local" value="${s.end_time&&new Date(s.end_time)>new Date()?toLocal(new Date(s.end_time)):''}"></div>
+     <div class="field"><label>Idade</label><div class="actions"><input id="pe_amin_${i}" type="number" min="13" max="65" style="width:80px" value="${t.age_min||18}"> até <input id="pe_amax_${i}" type="number" min="13" max="65" style="width:80px" value="${t.age_max||65}"></div>
+       ${t.age_range?`<div class="actions" style="margin-top:6px"><span class="lead-sub">Faixa sugerida ao Advantage+:</span><input id="pe_rmin_${i}" type="number" style="width:70px" value="${t.age_range[0]}"> até <input id="pe_rmax_${i}" type="number" style="width:70px" value="${t.age_range[1]}"></div>`:''}</div>
+     <div class="field"><label for="pe_gen_${i}">Sexo</label>${sel('pe_gen_'+i,{'':'Todos','1':'Homens','2':'Mulheres'},gv)}</div>
+     <div class="field"><label for="pe_geo_${i}">Países (códigos separados por vírgula)</label><input id="pe_geo_${i}" value="${esc((geo.countries||[]).join(', '))}">${extraGeo?`<div class="lead-sub">Também vão junto: ${esc(extraGeo)}.</div>`:''}</div>
+     <div class="field"><label><input type="checkbox" id="pe_adv_${i}" ${t.targeting_automation&&t.targeting_automation.advantage_audience?'checked':''}> Público Advantage+ (a Meta pode ampliar o público)</label></div>
+     <div class="field"><label>Posicionamentos</label><div class="actions"><label><input type="checkbox" id="pe_auto_${i}" ${pp.length?'':'checked'} onchange="document.querySelectorAll('.pe_pp_${i}').forEach(x=>x.disabled=this.checked)"> Automáticos (Advantage+)</label>
+       ${Object.entries(POS_LBL).map(([k,l])=>`<label><input type="checkbox" class="pe_pp_${i}" value="${k}" ${pp.includes(k)?'checked':''} ${pp.length?'':'disabled'}> ${l}</label>`).join('')}</div></div>
+    </div>
+    ${items.length?`<div class="field"><label>Segmentação detalhada (desmarque para tirar)</label><div class="actions" style="flex-wrap:wrap">${items.map(x=>`<label class="pill"><input type="checkbox" class="pe_it_${i}" data-path="${x.path}" checked> ${esc(kinds[x.kind]||x.kind)}: ${esc(x.name)}</label>`).join('')}</div></div>`:''}`;
+    s.ads.forEach((a,j)=>{
+      const f=adFields(a.creative),k=`${i}_${j}`;
+      if(f.kind==='post'){h+=`<div class="field"><label>Anúncio: <b>${esc(a.name)}</b></label><div class="lead-sub">Usa uma publicação existente da página: textos e imagem vão iguais ao post.</div></div>`;return}
+      h+=`<div class="card" style="margin:10px 0;padding:12px"><div class="grid2">
+       <div class="field"><label for="pe_an_${k}">Nome do anúncio</label><input id="pe_an_${k}" value="${esc(a.name)}"></div>
+       <div class="field"><label for="pe_cta_${k}">Botão</label>${sel('pe_cta_'+k,{'':'Igual ao original',...CTA_ALL},'')}<div class="lead-sub">Original: ${esc(CTA_ALL[f.cta]||f.cta||'—')}</div></div>
+       <div class="field"><label for="pe_head_${k}">Título${f.kind==='feed'?' (um por linha)':''}</label>${f.kind==='feed'?`<textarea id="pe_head_${k}">${esc(f.head)}</textarea>`:`<input id="pe_head_${k}" value="${esc(f.head)}">`}</div>
+       <div class="field"><label for="pe_desc_${k}">Descrição${f.kind==='feed'?' (uma por linha)':''}</label>${f.kind==='feed'?`<textarea id="pe_desc_${k}">${esc(f.desc)}</textarea>`:`<input id="pe_desc_${k}" value="${esc(f.desc)}">`}</div>
+       <div class="field"><label for="pe_link_${k}">Link de destino (usado quando o destino é Site)</label><input id="pe_link_${k}" value="${esc(f.link)}"></div>
+       <div class="field"><label><input type="checkbox" id="pe_dof_${k}" ${a.creative&&a.creative.degrees_of_freedom_spec?'checked':''}> Manter melhorias automáticas do Advantage+ criativo</label></div>
+      </div>
+      <div class="field"><label for="pe_msg_${k}">Texto principal${f.kind==='feed'?' (uma variação por linha)':''}</label><textarea id="pe_msg_${k}">${esc(f.msg)}</textarea></div></div>`;
+    });
+  });
+  return h;
+}
+/* Aplica o que foi editado numa cópia do pacote, antes de criar */
+function psApplyEdits(p0){
+  const p=JSON.parse(JSON.stringify(p0)),c=p.campaign,v=id=>{const e=$(id);return e?e.value.trim():null};
+  const dest=v('pe_dest')||'ORIG';p._dest=dest;p._wa=(v('pe_wa')||'').replace(/\D/g,'');
+  if($('pe_cbudget')){const b=centsOf(v('pe_cbudget'));if(b){if(c.daily_budget)c.daily_budget=b;else c.lifetime_budget=b}}
+  if($('pe_spend'))c.spend_cap=centsOf(v('pe_spend'))||undefined;
+  if(dest==='WHATSAPP'||dest==='MESSENGER')c.objective='OUTCOME_ENGAGEMENT';
+  else if(dest==='WEBSITE')c.objective='OUTCOME_TRAFFIC';
+  p.adsets.forEach((s,i)=>{
+    s.name=v('pe_sn_'+i)||s.name;
+    if($('pe_sb_'+i)){const b=centsOf(v('pe_sb_'+i));if(b){if(Number(s.lifetime_budget)>0)s.lifetime_budget=b;else s.daily_budget=b}}
+    const st=v('pe_st_'+i),en=v('pe_en_'+i);s.start_time=st?new Date(st).toISOString():null;s.end_time=en?new Date(en).toISOString():null;
+    const t=s.targeting=s.targeting||{};
+    t.age_min=Number(v('pe_amin_'+i))||t.age_min;t.age_max=Number(v('pe_amax_'+i))||t.age_max;
+    if($('pe_rmin_'+i))t.age_range=[Number(v('pe_rmin_'+i)),Number(v('pe_rmax_'+i))];
+    const g=v('pe_gen_'+i);if(g)t.genders=[Number(g)];else delete t.genders;
+    const cs=(v('pe_geo_'+i)||'').split(/[,;\s]+/).map(x=>x.toUpperCase()).filter(x=>/^[A-Z]{2}$/.test(x));
+    t.geo_locations=t.geo_locations||{};if(cs.length)t.geo_locations.countries=cs;else delete t.geo_locations.countries;
+    const adv=$('pe_adv_'+i);if(adv){t.targeting_automation={...(t.targeting_automation||{}),advantage_audience:adv.checked?1:0}}
+    if($('pe_auto_'+i)&&$('pe_auto_'+i).checked){for(const k of ['publisher_platforms','facebook_positions','instagram_positions','messenger_positions','audience_network_positions','threads_positions','device_platforms'])delete t[k]}
+    else if($('pe_auto_'+i)){const pl=[...document.querySelectorAll('.pe_pp_'+i)].filter(x=>x.checked).map(x=>x.value);if(pl.length){t.publisher_platforms=pl;for(const k of Object.keys(POS_LBL))if(!pl.includes(k))delete t[k+'_positions']}}
+    /* Itens desmarcados da segmentação detalhada */
+    const off=[...document.querySelectorAll('.pe_it_'+i)].filter(x=>!x.checked).map(x=>x.dataset.path);
+    off.sort().reverse().forEach(path=>{const q=path.split(':');
+      if(q[0]==='f'){const grp=(t.flexible_spec||[])[q[1]];if(grp&&grp[q[2]])grp[q[2]][q[3]]=null}
+      else{const arr=(t.exclusions||{})[q[1]];if(arr)arr[q[2]]=null}});
+    if(t.flexible_spec){t.flexible_spec=t.flexible_spec.map(grp=>{const o={};Object.entries(grp).forEach(([k,a])=>{const l=Array.isArray(a)?a.filter(Boolean):a;if(!Array.isArray(l)||l.length)o[k]=l});return o}).filter(o=>Object.keys(o).length);if(!t.flexible_spec.length)delete t.flexible_spec}
+    if(t.exclusions){Object.keys(t.exclusions).forEach(k=>{if(Array.isArray(t.exclusions[k])){t.exclusions[k]=t.exclusions[k].filter(Boolean);if(!t.exclusions[k].length)delete t.exclusions[k]}});if(!Object.keys(t.exclusions).length)delete t.exclusions}
+    if(dest==='WHATSAPP'||dest==='MESSENGER'){s.destination_type=dest;s.optimization_goal='CONVERSATIONS';s.billing_event='IMPRESSIONS';s.bid_strategy=s.bid_strategy==='COST_CAP'?s.bid_strategy:'LOWEST_COST_WITHOUT_CAP';
+      const pg=(s.promoted_object||{}).page_id||((s.ads[0]||{}).creative&&((s.ads[0].creative.object_story_spec||{}).page_id));s.promoted_object={page_id:pg};if(dest==='WHATSAPP'&&p._wa)s.promoted_object.whatsapp_phone_number=p._wa}
+    else if(dest==='WEBSITE'){s.destination_type='WEBSITE';s.optimization_goal='LINK_CLICKS';s.billing_event='IMPRESSIONS';delete s.promoted_object}
+    s.ads.forEach((a,j)=>{
+      const k=`${i}_${j}`,cr=a.creative||{};if(!$('pe_an_'+k))return;
+      a.name=v('pe_an_'+k)||a.name;
+      if(!$('pe_dof_'+k).checked)delete cr.degrees_of_freedom_spec;
+      const msg=v('pe_msg_'+k),head=v('pe_head_'+k),desc=v('pe_desc_'+k),link=v('pe_link_'+k),cta=v('pe_cta_'+k);
+      const o=cr.object_story_spec,ld=o&&o.link_data,vd=o&&o.video_data,af=cr.asset_feed_spec;
+      const ctaFor=(old)=>{
+        if(dest==='WHATSAPP')return{type:'WHATSAPP_MESSAGE',value:{app_destination:'WHATSAPP'}};
+        if(dest==='MESSENGER')return{type:'MESSAGE_PAGE',value:{app_destination:'MESSENGER'}};
+        const ty=cta||(old&&old.type)||'LEARN_MORE';
+        if(dest==='WEBSITE')return{type:ty==='SIGN_UP'&&!link?'LEARN_MORE':ty,value:{link}};
+        return{...(old||{}),type:ty};
+      };
+      const put=(o,k,x)=>{if(x)o[k]=x;else delete o[k]};
+      if(ld){put(ld,'message',msg);put(ld,'name',head);put(ld,'description',desc);
+        if(dest==='WHATSAPP')ld.link='https://api.whatsapp.com/send';else if(dest==='MESSENGER')ld.link='https://www.messenger.com/';else if(dest==='WEBSITE'&&link)ld.link=link;
+        ld.call_to_action=ctaFor(ld.call_to_action)}
+      else if(vd){put(vd,'message',msg);put(vd,'title',head);put(vd,'link_description',desc);vd.call_to_action=ctaFor(vd.call_to_action);
+        if(dest==='WHATSAPP')vd.call_to_action.value.link='https://api.whatsapp.com/send'}
+      else if(af){const L=x=>x.split('\n').map(s=>s.trim()).filter(Boolean).map(text=>({text}));
+        if(msg)af.bodies=L(msg);if(head)af.titles=L(head);if(desc)af.descriptions=L(desc);
+        if(dest==='WHATSAPP'){af.call_to_action_types=['WHATSAPP_MESSAGE'];af.link_urls=[{website_url:'https://api.whatsapp.com/send'}]}
+        else if(dest==='WEBSITE'&&link){af.link_urls=[{website_url:link}];if(cta)af.call_to_action_types=[cta]}
+        else if(cta)af.call_to_action_types=[cta]}
+      /* Rastreamento do anúncio original aponta para o post antigo: sai quando o destino muda */
+      if(dest!=='ORIG')delete a.tracking_specs;
+    });
+  });
+  return p;
+}
+/* Números de WhatsApp das BMs que o token enxerga */
+async function psWaNumbers(acc,tk){
+  const out=[];
+  try{
+    const a=await api(acc,{fields:'business{id}'},'GET',tk);
+    const bizs=a.business?[a.business.id]:(await all('me/businesses',{fields:'id'},50,tk)).map(b=>b.id);
+    for(const b of bizs){
+      const wabas=[...await all(`${b}/owned_whatsapp_business_accounts`,{fields:'id,name'},50,tk).catch(()=>[]),...await all(`${b}/client_whatsapp_business_accounts`,{fields:'id,name'},50,tk).catch(()=>[])];
+      for(const w of wabas){const ph=await all(`${w.id}/phone_numbers`,{fields:'display_phone_number,verified_name'},50,tk).catch(()=>[]);
+        ph.forEach(x=>{const num=String(x.display_phone_number||'').replace(/\D/g,'');if(num&&!out.find(o=>o.num===num))out.push({num,name:(x.verified_name||w.name)+' · '+x.display_phone_number})})}
+    }
+  }catch(e){}
+  return out;
+}
+const psPrepare=psGuard(async auto=>{
+  const p=psPkg();if(!p)return showErr('appErr','Cole uma campanha copiada válida.');
+  showErr('appErr','');const tk=psTok(),acc=$('ps_acc').value,N=p.names||{};
+  if(S.demo)return showErr('appErr','Exemplo: conecte um token para copiar campanhas reais.');
+  $('ps_map').innerHTML='<p class="muted">Lendo pixels, páginas, formulários e públicos da conta de destino…</p>';
+  const [px,pages,auds]=await Promise.all([
+    all(`${acc}/adspixels`,{fields:'name,id'},100,tk).catch(()=>[]),
+    all('me/accounts',{fields:'name,id,access_token,instagram_business_account{id,username}'},200,tk).catch(()=>[]),
+    all(`${acc}/customaudiences`,{fields:'name,id'},500,tk).catch(()=>[])]);
+  const srcPx=new Set(),srcPg=new Set(),srcForms=new Set(),srcAud=new Map();
+  p.adsets.forEach(s=>{const po=s.promoted_object||{};if(po.pixel_id)srcPx.add(po.pixel_id);if(po.page_id)srcPg.add(po.page_id);
+    const t=s.targeting||{};[...(t.custom_audiences||[]),...(t.excluded_custom_audiences||[])].forEach(a=>srcAud.set(a.id,a.name));
+    s.ads.forEach(a=>{const o=(a.creative||{}).object_story_spec||{};if(o.page_id)srcPg.add(o.page_id);JSON.stringify(a.creative||{}).replace(/"lead_gen_form_id":"?(\d+)/g,(_,f)=>srcForms.add(f))})});
+  const opt=(list,selId,extra='')=>extra+list.map(x=>`<option value="${x.id}" ${x.id===selId?'selected':''}>${esc(x.name)}${x.instagram_business_account?' · @'+esc(x.instagram_business_account.username):''} · ${x.id}</option>`).join('');
+  const lab=(id,kind)=>`${kind} original: <b>${esc((N[id]||{}).name||id)}</b>`;
+  const rows=[];const tag=(ok)=>ok?'<span class="pill p-good">Vinculado automaticamente</span>':'<span class="pill p-warn">Confira</span>';
+  for(const x of srcPx){
+    const inTgt=px.find(y=>y.id===x),match=bestMatch(x,(N[x]||{}).name,px),owner=(N[x]||{}).owner;
+    const shareOpt=!inTgt&&owner?`<option value="share:${x}:${owner}" ${!px.find(y=>norm(y.name)===norm((N[x]||{}).name))?'selected':''}>Usar o mesmo pixel original (compartilhar com a conta de destino)</option>`:'';
+    const auto=inTgt||px.find(y=>norm(y.name)===norm((N[x]||{}).name))||shareOpt;
+    rows.push(`<div class="field"><label for="psx_${x}">${lab(x,'Pixel')} ${tag(!!auto)}</label><select id="psx_${x}">${opt(px,match,shareOpt)||'<option value="">Nenhum pixel na conta de destino</option>'}</select></div>`);
+  }
+  for(const x of srcPg){
+    const match=bestMatch(x,(N[x]||{}).name,pages),ok=pages.find(y=>y.id===x||norm(y.name)===norm((N[x]||{}).name));
+    rows.push(`<div class="field"><label for="psp_${x}">${lab(x,'Página')} ${tag(!!ok)}</label><select id="psp_${x}" onchange="psFormsFor()">${opt(pages,match)||'<option value="">Nenhuma página</option>'}</select><div class="lead-sub">O Instagram ligado à página escolhida entra no anúncio automaticamente.</div></div>`);
+  }
+  for(const x of srcForms)rows.push(`<div class="field"><label for="psf_${x}">${lab(x,'Formulário')} <span id="psft_${x}"></span></label><select id="psf_${x}"><option value="">Carregando…</option></select></div>`);
+  for(const [id,name] of srcAud){
+    const m=auds.find(a=>norm(a.name)===norm(name));
+    rows.push(`<div class="field"><label for="psa_${id}">Público original: <b>${esc(name||id)}</b> ${tag(!!m)}</label><select id="psa_${id}"><option value="">Remover da cópia</option>${opt(auds,m?m.id:'')}</select></div>`);
+  }
+  const waSrc=p.waNums||[];const nums=await psWaNumbers(acc,tk);
+  if(waSrc.length||p.adsets.some(s=>/WHATSAPP/.test(s.destination_type||''))){
+    for(const w of (waSrc.length?waSrc:[''])){
+      const same=nums.find(n=>n.num===w);
+      rows.push(`<div class="field"><label for="psw_${w||'x'}">WhatsApp original: <b>${esc(w?'+'+w:'não informado')}</b> ${tag(!!same)}</label><input id="psw_${w||'x'}" list="ps_waList" value="${esc(same?w:(nums[0]?nums[0].num:w))}" placeholder="5511999999999"><div class="lead-sub">Número com DDI e DDD, só dígitos. Ele precisa estar ligado à página escolhida acima.</div></div>`);
+    }
+    }
+  rows.push(`<datalist id="ps_waList">${nums.map(n=>`<option value="${n.num}">${esc(n.name)}</option>`).join('')}</datalist>`);
+  rows.push(`<div class="field"><label for="ps_name">Nome da nova campanha</label><input id="ps_name" value="${esc(p.campaign.name)}"></div>`);
+  S._ps={p,tk,acc,pages,srcForms,N,waNums:nums};
+  $('ps_map').innerHTML=`<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 8px">Vínculos na conta de destino</h3>
+   <div class="grid2">${rows.join('')}</div>
+   ${psEditorHtml(p)}
+   <div class="note">Também vão junto: objetivo, orçamento, limite de gastos, lance e limites de lance, otimização, programação, controle de frequência, idade, sexo, locais, interesses, Advantage+ público, posicionamentos, janela de atribuição, destino (site, formulário, WhatsApp ou Messenger), textos, títulos, botões, links, UTMs, rastreamento, melhorias do Advantage+ criativo, imagens, vídeos e anúncios com publicação existente (quando a página é a mesma). Tudo é criado <b>pausado</b>.</div>
+   <div class="actions" style="margin-top:12px"><button class="primary" onclick="psRun()">Criar cópia vinculada</button></div>`;
+  await psFormsFor();
+  $('pasteCard').scrollIntoView({behavior:'smooth',block:'start'});
+});
+const psFormsFor=psGuard(async()=>{
+  const {pages,srcForms,N,tk}=S._ps;if(!srcForms.size)return;
+  const pgSel=document.querySelector('[id^=psp_]');const pg=pages.find(x=>x.id===(pgSel&&pgSel.value));
+  const fs=pg?await all(`${pg.id}/leadgen_forms`,{fields:'name,id,status'},200,pg.access_token||tk).catch(()=>[]):[];
+  for(const x of srcForms){
+    const m=bestMatch(x,(N[x]||{}).name,fs.filter(f=>f.status==='ACTIVE'));
+    $('psf_'+x).innerHTML=fs.map(f=>`<option value="${f.id}" ${f.id===m?'selected':''}>${esc(f.name)} · ${f.status==='ACTIVE'?'ativo':'inativo'}</option>`).join('')||'<option value="">Página sem formulários. Crie um nela antes.</option>';
+    $('psft_'+x).innerHTML=fs.find(f=>f.id===x||norm(f.name)===norm((N[x]||{}).name))?'<span class="pill p-good">Vinculado automaticamente</span>':'<span class="pill p-warn">Confira</span>';
+  }
+});
+function swapIds(o,m,parent){
+  if(Array.isArray(o))return o.map(x=>swapIds(x,m,parent));
+  if(!o||typeof o!=='object')return o;
+  const r={};
+  for(const [k,v] of Object.entries(o)){
+    if(k==='instagram_actor_id'||k==='instagram_user_id')continue;
+    if((k==='page_id'||k==='pixel_id'||k==='lead_gen_form_id')&&m[String(v)])r[k]=m[String(v)];
+    else if((k==='image_hash'||k==='hash')&&typeof v==='string'){
+      if(m['img:'+v])r[k]=m['img:'+v];
+      /* Imagem não copiada: usa o endereço da original (a Meta baixa a imagem ao criar o anúncio) */
+      else if(m['imgurl:'+v]){if(k==='hash')r.url=m['imgurl:'+v];else if(parent==='video_data')r.image_url=m['imgurl:'+v];else r.picture=m['imgurl:'+v]}
+      else r[k]=v;
+    }
+    else if(k==='video_id'&&m['vid:'+v])r[k]=m['vid:'+v];
+    else if((k==='whatsapp_phone_number'||k==='whatsapp_number')&&m['wa:'+String(v).replace(/\D/g,'')])r[k]=m['wa:'+String(v).replace(/\D/g,'')];
+    else r[k]=typeof v==='object'?swapIds(v,m,k):v;
+  }
+  return r;
+}
+const psRun=psGuard(async()=>{
+  const {tk,acc,pages}=S._ps;const p=psApplyEdits(S._ps.p);const log=$('ps_log');
+  const step=(t,bad)=>log.insertAdjacentHTML('beforeend',`<div class="lead-sub" ${bad?'style="color:var(--warn)"':''}>${bad?'⚠':'✓'} ${esc(t)}</div>`);
+  log.innerHTML='<p class="muted">Criando cópia…</p>';
+  const m={};
+  const tgtAccNum=acc.replace('act_','');
+  for(const el of document.querySelectorAll('[id^=psx_],[id^=psp_],[id^=psf_],[id^=psa_]')){
+    const src=el.id.slice(4),v=el.value.trim();
+    if(v.startsWith('share:')){const [,pid,owner]=v.split(':');
+      try{await api(`${pid}/shared_accounts`,{account_id:tgtAccNum,business:owner},'POST');step('Pixel original compartilhado com a conta de destino')}
+      catch(e){step('Não consegui compartilhar o pixel: '+e.message+' A cópia segue com o mesmo pixel; confira o acesso na BM.',true)}
+      m[src]=pid}
+    else if(el.id.startsWith('psa_'))m['aud:'+src]=v;
+    else if(v)m[src]=v;
+  }
+  if(p._dest==='WHATSAPP'&&!p._wa)throw new Error('Informe o número do WhatsApp de destino.');
+  for(const el of document.querySelectorAll('[id^=psw_]')){const src=el.id.slice(4),v=el.value.replace(/\D/g,'');if(v){m['wa:'+(src==='x'?'':src)]=v;if(src==='x')m.waDefault=v}}
+  if(p._wa){m.waDefault=p._wa;(p.waNums||[]).forEach(w=>m['wa:'+w]=p._wa)}
+  for(const vid of p.videos){
+    if(tgtAccNum===p.source.account_id){m['vid:'+vid]=vid;continue}
+    try{
+      const sv=await api(vid,{fields:'source,title'});
+      const nv=(await api(`${acc}/advideos`,{file_url:sv.source,name:sv.title||('Vídeo '+vid)},'POST',tk)).id;
+      step('Vídeo enviado, aguardando processar…');
+      let ok=false;
+      for(let i=0;i<60;i++){await new Promise(r=>setTimeout(r,5000));const st=await api(nv,{fields:'status'},'GET',tk);const vs=st.status&&st.status.video_status;if(vs==='ready'){ok=true;break}if(vs==='error')throw new Error('a Meta não conseguiu processar o vídeo')}
+      if(!ok)step('Vídeo '+vid+' ainda processando; o anúncio vai tentar usar assim mesmo.',true);
+      m['vid:'+vid]=nv;step('Vídeo copiado');
+    }catch(e){step('Vídeo '+vid+' não copiado: '+e.message,true)}
+  }
+  if(p.images.length){
+    if(tgtAccNum===p.source.account_id)p.images.forEach(h=>m['img:'+h]=h);
+    else for(const h of p.images){
+      try{const r=await api(`${acc}/adimages`,{copy_from:JSON.stringify({source_account_id:p.source.account_id,hash:h})},'POST',tk);m['img:'+h]=Object.values(r.images||{})[0].hash;}
+      catch(e){
+        if((p.imgUrls||{})[h]){m['imgurl:'+h]=p.imgUrls[h];step('Imagem '+h.slice(0,8)+'… vai pelo endereço da original (a conta de destino não pôde copiar direto).')}
+        else step('Imagem '+h.slice(0,8)+'… não copiada: '+e.message,true)}
+    }
+    step('Imagens processadas');
+  }
+  const c=p.campaign,cp={name:$('ps_name').value||c.name+' (cópia)',objective:c.objective,status:'PAUSED',special_ad_categories:JSON.stringify(c.special_ad_categories||[])};
+  if(c.special_ad_category_country&&c.special_ad_category_country.length)cp.special_ad_category_country=JSON.stringify(c.special_ad_category_country);
+  if(c.buying_type)cp.buying_type=c.buying_type;
+  if(c.spend_cap&&Number(c.spend_cap)>0)cp.spend_cap=c.spend_cap;
+  const cbo=!!(c.daily_budget||c.lifetime_budget);
+  if(cbo){if(c.daily_budget)cp.daily_budget=c.daily_budget;if(c.lifetime_budget)cp.lifetime_budget=c.lifetime_budget;if(c.bid_strategy)cp.bid_strategy=c.bid_strategy;if(c.pacing_type)cp.pacing_type=JSON.stringify(c.pacing_type)}
+  else cp.is_adset_budget_sharing_enabled='false';
+  if(c.promoted_object)cp.promoted_object=JSON.stringify(swapIds(c.promoted_object,m));
+  const camp=(await api(`${acc}/campaigns`,cp,'POST',tk)).id;step('Campanha criada (pausada)');
+  const soon=new Date(Date.now()+36e5);
+  const J=v=>JSON.stringify(v);
+  let nSets=0,nAds=0,nFail=0;
+  for(const s of p.adsets){
+    try{
+      const t={...(s.targeting||{})};
+      for(const k of ['custom_audiences','excluded_custom_audiences']){if(t[k]){const l=t[k].map(a=>m['aud:'+a.id]).filter(Boolean).map(id=>({id}));if(l.length)t[k]=l;else delete t[k]}}
+      const ap={name:s.name,campaign_id:camp,billing_event:s.billing_event,optimization_goal:s.optimization_goal,targeting:J(t),status:'PAUSED'};
+      if(!cbo){if(s.daily_budget)ap.daily_budget=s.daily_budget;if(s.lifetime_budget)ap.lifetime_budget=s.lifetime_budget;if(s.bid_strategy)ap.bid_strategy=s.bid_strategy;if(s.pacing_type)ap.pacing_type=J(s.pacing_type)}
+      if(s.bid_amount)ap.bid_amount=s.bid_amount;
+      if(s.bid_constraints)ap.bid_constraints=J(s.bid_constraints);
+      if(s.optimization_sub_event&&s.optimization_sub_event!=='NONE')ap.optimization_sub_event=s.optimization_sub_event;
+      if(s.destination_type)ap.destination_type=s.destination_type;
+      if(s.promoted_object){const po=swapIds(s.promoted_object,m);if(/WHATSAPP/.test(s.destination_type||'')&&!po.whatsapp_phone_number&&m.waDefault)po.whatsapp_phone_number=m.waDefault;ap.promoted_object=J(po)}
+      if(s.attribution_spec)ap.attribution_spec=J(s.attribution_spec);
+      if(s.frequency_control_specs)ap.frequency_control_specs=J(s.frequency_control_specs);
+      if(s.is_dynamic_creative)ap.is_dynamic_creative='true';
+      if(s.multi_optimization_goal_weight&&s.multi_optimization_goal_weight!=='UNDEFINED')ap.multi_optimization_goal_weight=s.multi_optimization_goal_weight;
+      if(s.adset_schedule&&s.adset_schedule.length)ap.adset_schedule=J(s.adset_schedule);
+      for(const k of ['daily_min_spend_target','daily_spend_cap','lifetime_min_spend_target','lifetime_spend_cap'])if(s[k]&&Number(s[k])>0)ap[k]=s[k];
+      if(s.dsa_beneficiary)ap.dsa_beneficiary=s.dsa_beneficiary;if(s.dsa_payor)ap.dsa_payor=s.dsa_payor;
+      /* Anunciante e pagador verificados (exigido para anúncios no Brasil) */
+      if(s.regional_regulated_categories&&s.regional_regulated_categories.length)ap.regional_regulated_categories=J(s.regional_regulated_categories);
+      if(s.regional_regulation_identities)ap.regional_regulation_identities=J(s.regional_regulation_identities);
+      const st=s.start_time&&new Date(s.start_time)>soon?new Date(s.start_time):soon;ap.start_time=st.toISOString();
+      if(s.end_time){const en=new Date(s.end_time);if(en>st)ap.end_time=en.toISOString();else if(s.lifetime_budget&&!cbo){const d=new Date(st.getTime()+7*864e5);ap.end_time=d.toISOString();step(`"${s.name}": término já passou, coloquei 7 dias a partir do início. Ajuste se precisar.`,true)}}
+      const as=(await api(`${acc}/adsets`,ap,'POST',tk)).id;step('Conjunto: '+s.name);nSets++;
+      for(const a of s.ads){
+        const cr=a.creative||{};
+        const cp2={name:(cr.name||a.name)+' (cópia)'};
+        if(!cr.object_story_spec&&!cr.asset_feed_spec){
+          /* Anúncio feito com publicação existente: dá para reaproveitar se a página continua a mesma */
+          const post=cr.object_story_id||cr.effective_object_story_id,pgId=post&&String(post).split('_')[0];
+          if(post&&(!m[pgId]||m[pgId]===pgId))cp2.object_story_id=post;
+          else{step(`Anúncio "${a.name}" usa uma publicação da página original e a página de destino é outra. Crie de novo na conta de destino.`,true);nFail++;continue}
+        }
+        const vids=[];collectMedia(cr,new Set(),{add:v=>vids.push(v)});
+        if(vids.some(v=>!m['vid:'+v])){step(`Anúncio "${a.name}" foi pulado porque o vídeo não copiou.`,true);nFail++;continue}
+        const spec=cr.object_story_spec?swapIds(cr.object_story_spec,m):null;
+        const pg=spec&&pages.find(x=>x.id===spec.page_id);
+        if(spec&&pg&&pg.instagram_business_account)spec.instagram_user_id=pg.instagram_business_account.id;
+        if(spec)cp2.object_story_spec=J(spec);
+        if(cr.asset_feed_spec)cp2.asset_feed_spec=J(swapIds(cr.asset_feed_spec,m));
+        if(cr.degrees_of_freedom_spec){const d=JSON.parse(J(cr.degrees_of_freedom_spec));if(d.creative_features_spec)delete d.creative_features_spec.standard_enhancements;cp2.degrees_of_freedom_spec=J(d)}
+        if(cr.contextual_multi_ads)cp2.contextual_multi_ads=J(cr.contextual_multi_ads);
+        if(cr.platform_customizations)cp2.platform_customizations=J(swapIds(cr.platform_customizations,m));
+        if(cr.url_tags)cp2.url_tags=cr.url_tags;
+        try{
+          let crId;
+          try{crId=(await api(`${acc}/adcreatives`,cp2,'POST',tk)).id}
+          catch(e){
+            /* Recursos do Advantage+ criativo às vezes não valem na conta de destino: tenta de novo sem eles */
+            if(!cp2.degrees_of_freedom_spec&&!cp2.contextual_multi_ads)throw e;
+            delete cp2.degrees_of_freedom_spec;delete cp2.contextual_multi_ads;
+            crId=(await api(`${acc}/adcreatives`,cp2,'POST',tk)).id;step(`"${a.name}": melhorias automáticas do Advantage+ não foram aceitas na conta de destino. Ative de novo no Gerenciador se quiser.`,true)}
+          const adp={name:a.name,adset_id:as,creative:J({creative_id:crId}),status:'PAUSED'};
+          if(a.tracking_specs)adp.tracking_specs=J(swapIds(a.tracking_specs,m));
+          if(a.conversion_domain)adp.conversion_domain=a.conversion_domain;
+          try{await api(`${acc}/ads`,adp,'POST',tk)}
+          catch(e){if(!adp.tracking_specs)throw e;delete adp.tracking_specs;await api(`${acc}/ads`,adp,'POST',tk)}
+          step('Anúncio: '+a.name);nAds++}
+        catch(e){step(`Anúncio "${a.name}" falhou: ${e.message}`,true);nFail++}
+      }
+    }catch(e){step(`Conjunto "${s.name}" falhou: ${e.message}${/anunciante|advertiser|beneficiar/i.test(e.message)?' Na conta de destino, abra o Gerenciador → conjunto → "Anunciante e pagador" e escolha o anunciante verificado; depois copie de novo.':''}`,true);nFail++}
+  }
+  const d=getDrafts();d.unshift({acc,camp,name:cp.name,at:new Date().toISOString()});saveDrafts(d);
+  log.insertAdjacentHTML('beforeend',`<div class="note"><b>${nSets} conjunto(s) e ${nAds} anúncio(s) criados, pausados.</b>${nFail?` ${nFail} item(ns) com aviso acima.`:''} ${S.accounts.find(a=>a.id===acc)?`<button class="sm primary" onclick="selectAccount('${acc}');setTimeout(()=>{document.querySelector('[data-t=create]').click();setTimeout(()=>reviewDraft('${camp}'),600)},300)">Revisar e publicar</button>`:'Como a conta de destino é de outro perfil, entre com o token dele no painel para revisar e publicar.'}</div>`);
+});
+
+function toLocal(d){const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,16)}
+function fillFromBrief(){
+  const t=$('nc_brief').value.trim(); if(!t){showErr('appErr','Escreva a descrição da campanha primeiro.');return}
+  showErr('appErr','');const o=parseBrief(t);$('nc_form').hidden=false;
+  const st=new Date();st.setHours(st.getHours()+1,0,0,0);
+  const set=(id,v)=>{$(id).value=v};
+  set('nc_name',o.name);set('nc_obj',o.obj);set('nc_btype',o.btype);set('nc_budget',o.budget);set('nc_start',toLocal(st));
+  set('nc_end',o.days?toLocal(new Date(st.getTime()+o.days*864e5)):'');set('nc_amin',o.amin);set('nc_amax',o.amax);set('nc_gender',o.gender);
+  set('nc_city',o.city);set('nc_raio',o.raio);set('nc_link',o.link);set('nc_head',o.headline);set('nc_text',o.text);set('nc_cta',o.cta);
+  ncObjChange();$('nc_form').scrollIntoView({behavior:'smooth',block:'start'});toast('Rascunho montado. Confira os campos.');
+}
+function ncObjChange(){const o=$('nc_obj').value;$('nc_pxBox').hidden=o!=='SALES';$('nc_formBox').hidden=o!=='LEADS';$('nc_linkBox').hidden=o==='LEADS';$('nc_cta').value=OBJ[o].cta;if(o==='LEADS')ncLoadForms()}
+const ncLoadForms=guard(async()=>{
+  if($('nc_obj').value!=='LEADS')return;
+  const pages=await getPages();const pg=pages.find(p=>p.id===$('nc_page').value);
+  if(!pg){$('nc_lf').innerHTML='<option value="">Escolha uma página</option>';return}
+  const fs=S.demo?DEMO.forms:await all(`${pg.id}/leadgen_forms`,{fields:'name,id,status'},200,pg.access_token);
+  $('nc_lf').innerHTML=fs.filter(f=>f.status==='ACTIVE').map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('')||'<option value="">Nenhum formulário ativo. Crie um na página primeiro.</option>';
+});
+function readFile(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(f)})}
+
+async function createDraft(){
+  const v=id=>$(id).value.trim();
+  const obj=v('nc_obj'),O=OBJ[obj],btype=v('nc_btype'),budget=Math.round(Number(v('nc_budget'))*100);
+  const errs=[];
+  if(!v('nc_name'))errs.push('dê um nome à campanha');
+  if(!(budget>=500))errs.push('o orçamento mínimo é R$ 5');
+  if(btype==='lifetime'&&!v('nc_end'))errs.push('orçamento total precisa de data de término');
+  if(obj==='SALES'&&!v('nc_px'))errs.push('vendas precisa de um pixel');
+  if(obj==='LEADS'&&!v('nc_page'))errs.push('cadastro precisa de uma página');
+  if(obj!=='LEADS'&&$('nc_img').files[0]&&!v('nc_link'))errs.push('informe o link de destino do anúncio');
+  if(errs.length){showErr('appErr','Antes de criar: '+errs.join('; ')+'.');return}
+  showErr('appErr','');
+  const log=$('nc_log');const step=t=>log.insertAdjacentHTML('beforeend',`<div class="lead-sub">✓ ${esc(t)}</div>`);log.innerHTML='<p class="muted">Criando na Meta…</p>';
+  if(S.demo){step('Campanha criada (exemplo)');step('Conjunto criado (exemplo)');const d=getDrafts();d.unshift({acc:S.acc.id,camp:'demo-'+Date.now(),name:v('nc_name'),at:new Date().toISOString()});saveDrafts(d);toast('Exemplo: nada foi criado na Meta');return}
+  let camp,adset,ad;
+  try{
+    camp=(await api(`${S.acc.id}/campaigns`,{name:v('nc_name'),objective:O.api,status:'PAUSED',special_ad_categories:'[]',is_adset_budget_sharing_enabled:'false'},'POST')).id;
+    step('Campanha criada (pausada)');
+    const targeting={age_min:Number(v('nc_amin'))||18,age_max:Number(v('nc_amax'))||65,targeting_automation:{advantage_audience:0}};
+    if(v('nc_gender'))targeting.genders=[Number(v('nc_gender'))];
+    if(v('nc_city')){
+      const g=await api('search',{type:'adgeolocation',q:v('nc_city'),location_types:'["city"]',country_code:'BR'});
+      const c=(g.data||[])[0];
+      if(!c)throw new Error(`Não encontrei a cidade "${v('nc_city')}". Confira a grafia ou deixe vazio para Brasil todo.`);
+      targeting.geo_locations={cities:[{key:c.key,radius:Math.min(80,Math.max(17,Number(v('nc_raio'))||25)),distance_unit:'kilometer'}]};
+      step(`Cidade: ${c.name}, ${c.region||''}`);
+    }else targeting.geo_locations={countries:['BR']};
+    const ap={name:v('nc_name')+' · Conjunto 1',campaign_id:camp,billing_event:'IMPRESSIONS',optimization_goal:O.opt,bid_strategy:'LOWEST_COST_WITHOUT_CAP',
+      targeting:JSON.stringify(targeting),status:'PAUSED',start_time:new Date(v('nc_start')||Date.now()).toISOString()};
+    ap[btype==='daily'?'daily_budget':'lifetime_budget']=budget;
+    if(v('nc_end'))ap.end_time=new Date(v('nc_end')).toISOString();
+    if(obj==='SALES')ap.promoted_object=JSON.stringify({pixel_id:v('nc_px'),custom_event_type:'PURCHASE'});
+    if(obj==='LEADS'){ap.promoted_object=JSON.stringify({page_id:v('nc_page')});ap.destination_type='ON_AD'}
+    adset=(await api(`${S.acc.id}/adsets`,ap,'POST')).id;
+    step('Conjunto de anúncios criado (pausado)');
+    const file=$('nc_img').files[0];
+    if(file&&v('nc_page')){
+      const up=await api(`${S.acc.id}/adimages`,{bytes:await readFile(file)},'POST');
+      const hash=Object.values(up.images||{})[0].hash;step('Imagem enviada');
+      const pg=(await getPages()).find(p=>p.id===v('nc_page'))||{};
+      const link=obj==='LEADS'?(v('nc_link')||`https://www.facebook.com/${v('nc_page')}`):v('nc_link');
+      const cta={type:v('nc_cta'),value:obj==='LEADS'?{lead_gen_form_id:v('nc_lf')}:{link}};
+      const spec={page_id:v('nc_page'),link_data:{link,message:v('nc_text'),name:v('nc_head'),image_hash:hash,call_to_action:cta}};
+      if(pg.instagram_business_account)spec.instagram_user_id=pg.instagram_business_account.id;
+      const cr=(await api(`${S.acc.id}/adcreatives`,{name:v('nc_name')+' · Criativo',object_story_spec:JSON.stringify(spec)},'POST')).id;
+      step('Criativo criado');
+      ad=(await api(`${S.acc.id}/ads`,{name:v('nc_name')+' · Anúncio 1',adset_id:adset,creative:JSON.stringify({creative_id:cr}),status:'PAUSED'},'POST')).id;
+      step('Anúncio criado (pausado)');
+    }
+    const d=getDrafts();d.unshift({acc:S.acc.id,camp,name:v('nc_name'),at:new Date().toISOString()});saveDrafts(d);
+    delete S.cache['cp'+S.period];
+    reviewDraft(camp);
+  }catch(e){
+    log.insertAdjacentHTML('beforeend',`<div class="err">Parou nesta etapa: ${esc(e.message)}${camp?'<br>O que já foi criado está pausado e não gasta. Você pode corrigir e tentar de novo, ou excluir no Gerenciador.':''}</div>`);
+    if(camp){const d=getDrafts();d.unshift({acc:S.acc.id,camp,name:v('nc_name')+' (incompleto)',at:new Date().toISOString()});saveDrafts(d)}
+  }
+}
+
+const reviewDraft=guard(async id=>{
+  const box=$('nc_review');
+  if(S.demo){box.innerHTML='<div class="card muted">No modo exemplo não há rascunho real para revisar. Conecte seu token para criar e revisar campanhas de verdade.</div>';return}
+  box.innerHTML='<div class="card muted">Carregando rascunho…</div>';
+  const c=await api(id,{fields:'name,status,effective_status,objective,adsets{name,status,daily_budget,lifetime_budget,start_time,end_time,optimization_goal,targeting},ads{name,status,effective_status,preview_shareable_link,ad_review_feedback}'});
+  const sets=(c.adsets&&c.adsets.data)||[],ads=(c.ads&&c.ads.data)||[];
+  const tg=t=>{if(!t)return'—';const g=t.geo_locations||{};const loc=g.cities?g.cities.map(x=>x.name+' +'+x.radius+'km').join(', '):(g.countries||[]).join(', ');return `${loc} · ${t.age_min}–${t.age_max} anos · ${t.genders?(t.genders[0]==2?'mulheres':'homens'):'todos'}`};
+  const live=c.status==='ACTIVE';
+  box.innerHTML=`<div class="card"><div class="card-h"><h2>Revisar: ${esc(c.name)}</h2>${statusPill(c.effective_status)}</div>
+    <table><tbody>
+      <tr><td class="muted">Objetivo</td><td>${esc((Object.values(OBJ).find(o=>o.api===c.objective)||{}).l||c.objective)}</td></tr>
+      ${sets.map(s=>`<tr><td class="muted">Conjunto</td><td><b>${esc(s.name)}</b> ${statusPill(s.status)}<div class="lead-sub">${s.daily_budget?money(s.daily_budget/100)+' por dia':money(s.lifetime_budget/100)+' no total'} · ${dt(s.start_time)}${s.end_time?' até '+dt(s.end_time):' sem data de término'}</div><div class="lead-sub">${esc(tg(s.targeting))}</div></td></tr>`).join('')}
+      ${ads.map(a=>`<tr><td class="muted">Anúncio</td><td><b>${esc(a.name)}</b> ${statusPill(a.effective_status)}${a.preview_shareable_link?` · <a href="${esc(a.preview_shareable_link)}" target="_blank" rel="noopener">Ver prévia</a>`:''}${a.ad_review_feedback?`<div class="err">${esc(JSON.stringify(a.ad_review_feedback))}</div>`:''}</td></tr>`).join('')||'<tr><td class="muted">Anúncio</td><td class="muted">Nenhum anúncio ainda. Adicione no Gerenciador antes de publicar.</td></tr>'}
+    </tbody></table>
+    <div class="actions" style="margin-top:14px">
+      <a href="https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${S.acc.account_id}&selected_campaign_ids=${c.id}" target="_blank" rel="noopener"><button tabindex="-1">Abrir e editar no Gerenciador</button></a>
+      ${live?`<button class="danger" onclick="publishDraft('${c.id}',false)">Pausar tudo</button>`:`<button class="primary" ${ads.length?'':'disabled title="Adicione um anúncio antes"'} onclick="publishDraft('${c.id}',true)">Publicar</button>`}
+    </div></div>`;
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+  S._rev={c,sets,ads};
+});
+function publishDraft(id,on){
+  const {c,sets,ads}=S._rev;
+  const total=sets.reduce((a,s)=>a+Number(s.daily_budget||s.lifetime_budget||0),0)/100;
+  confirmBox(on?'Publicar campanha?':'Pausar campanha?',on?`<b>${esc(c.name)}</b> vai para análise da Meta e começa a gastar até <b>${money(total)}</b> ${sets[0]&&sets[0].daily_budget?'por dia':'no total'} assim que for aprovada.`:'A campanha, os conjuntos e os anúncios param de gastar agora.',on?'Publicar':'Pausar',async()=>{
+    try{const st=on?'ACTIVE':'PAUSED';for(const a of ads)await api(a.id,{status:st},'POST');for(const s of sets)await api(s.id,{status:st},'POST');await api(c.id,{status:st},'POST');
+      toast(on?'Publicada. Em análise pela Meta.':'Pausada');delete S.cache['cp'+S.period];reviewDraft(id)}catch(e){showErr('appErr',e.message)}
+  },!on);
+}
+
+/* ---------- WhatsApp automático: boas-vindas a cada novo lead ---------- */
+const WA_DEF={waba:'',phone:'',tpl:'boas_vindas_cadastro',marca:'',
+  body:'Olá, {{1}}! Obrigado pelo seu cadastro.\n\nRecebemos suas informações com sucesso e nossa equipe entrará em contato com você em breve por aqui para dar continuidade ao seu atendimento.\n\nSe quiser adiantar, é só responder esta mensagem com a sua dúvida.',
+  footer:'Equipe {{marca}}'};
+const waCfg=()=>{let c;try{c={...WA_DEF,...JSON.parse(store.get('cm_wa_cfg')||'{}')}}catch(e){c={...WA_DEF}}if(!c.waba)c.waba=WA_DEF.waba;if(!c.phone)c.phone=WA_DEF.phone;return c};
+const waSave=()=>{if(!$('wa_body'))return waCfg();const c={};['waba','phone','tpl','marca','body','footer','page'].forEach(k=>{const el=$('wa_'+k);if(el)c[k]=el.value.trim()});const fe=document.querySelectorAll('.wa_form');c.forms=fe.length?[...document.querySelectorAll('.wa_form:checked')].map(x=>x.value):(waCfg().forms||[]);store.set('cm_wa_cfg',JSON.stringify(c));return {...WA_DEF,...c}};
+const waSent=()=>{try{return JSON.parse(store.get('cm_wa_sent')||'{}')}catch(e){return{}}};
+const fillMarca=(t,c)=>t.replace(/\{\{marca\}\}/g,c.marca||'');
+let WA_TIMER=null,WA_SINCE=0;
+function waLog(t,bad){const el=$('wa_log');if(!el)return;el.insertAdjacentHTML('afterbegin',`<div class="lead-sub" ${bad?'style="color:var(--bad)"':''}>${new Date().toLocaleTimeString('pt-BR')} · ${esc(t)}</div>`)}
+const tWa=guard(async()=>{
+  const c=waCfg(),pages=await getPages().catch(()=>[]);
+  $('tabBody').innerHTML=`
+  <div class="card" style="margin-top:0"><div class="card-h"><h2>WhatsApp Business do celular</h2><span class="pill p-good">Em uso</span></div>
+    <p class="muted" style="font-size:14px;margin:0 0 12px">Seu número fica só no app. O lead toca no botão do formulário, manda a primeira mensagem e a saudação automática do app responde na hora.</p>
+    <div class="actions" style="margin-bottom:14px">
+      <a href="https://web.whatsapp.com/" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Abrir WhatsApp Web</button></a>
+      <a href="https://business.facebook.com/latest/inbox/" target="_blank" rel="noopener"><button class="sm primary" tabindex="-1">Responder no Business Suite</button></a>
+    </div>
+    
+    <div class="grid2">
+      <div class="field"><label for="wb_num">Número do WhatsApp (com DDI e DDD)</label><input id="wb_num" value="${esc((store.get('cm_wb_num')&&store.get('cm_wb_num')!=='558598382582'?store.get('cm_wb_num'):''))}" oninput="wbUpd()"></div>
+      <div class="field"><label for="wb_txt">Mensagem que o lead envia</label><input id="wb_txt" value="${esc(store.get('cm_wb_txt')||'Olá! Acabei de me cadastrar no formulário.')}" oninput="wbUpd()"></div>
+    </div>
+    <div class="field" style="margin-top:10px"><label>1. Link para o botão da tela de conclusão do formulário ("Ver site")</label><div class="perm" id="wb_link"></div></div>
+    <div class="actions" style="margin-top:6px"><button class="sm" onclick="copyText($('wb_link').textContent)">Copiar link</button><a id="wb_test" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Testar link</button></a></div>
+    <div class="field" style="margin-top:14px"><label for="wb_greet">2. Mensagem de saudação (WhatsApp Business → Ferramentas comerciais → Mensagem de saudação)</label><textarea id="wb_greet" style="min-height:140px" oninput="store.set('cm_wb_greet',this.value)">${esc((store.get('cm_wb_greet')||'').replace(/Atendimento B/g,'Influenciadores')||'Olá! Obrigado pelo seu cadastro. 😊\n\nRecebemos suas informações com sucesso e nossa equipe entrará em contato com você em breve por aqui para dar continuidade ao seu atendimento.\n\nSe quiser adiantar, é só enviar sua dúvida nesta conversa.\n\n*Equipe Influenciadores*')}</textarea></div>
+    <div class="actions" style="margin-top:6px"><button class="sm" onclick="copyText($('wb_greet').value)">Copiar saudação</button></div>
+    <div class="note">Na tela de conclusão do formulário: título "Cadastro recebido! Toque abaixo para falar com nossa equipe.", botão "Ver site" com o link acima e texto do botão "Falar no WhatsApp agora". Quem não tocar no botão, chame pela aba Formulários e leads.</div>
+  </div>
+  <details class="card"><summary style="cursor:pointer;font-weight:600">Envio pela API oficial (só para número fora do app)</summary>
+  <div class="card" style="margin-top:0"><div class="card-h"><h2>Boas-vindas automáticas no WhatsApp</h2><span id="wa_state">${WA_TIMER?'<span class="pill p-good">Ligado</span>':'<span class="pill p-mut">Desligado</span>'}</span></div>
+    <p class="muted" style="font-size:14px;margin:0">Quando alguém preencher seu formulário, o painel envia pelo seu WhatsApp Business uma mensagem de boas-vindas avisando que a equipe vai entrar em contato. Usa a API oficial do WhatsApp (Cloud API) e um modelo de mensagem aprovado pela Meta.</p>
+  </div>
+
+  <div class="card"><h2>1. Número do WhatsApp Business</h2>
+    <div class="grid2" style="margin-top:10px">
+      <div class="field"><label for="wa_waba">Conta do WhatsApp Business (WABA)</label><input id="wa_waba" value="${esc(c.waba||'')}" placeholder="ID da WABA"></div>
+      <div class="field"><label for="wa_phone">Número que envia</label><select id="wa_phone">${c.phone?`<option value="${esc(c.phone)}">${c.phone===WA_DEF.phone?'Número padrão':esc(c.phone)}</option>`:'<option value="">Clique em Buscar</option>'}</select></div>
+    </div>
+    <div class="actions" style="margin-top:10px"><button onclick="waFind()">Buscar WABA e números na BM</button></div>
+    <div class="note">O número precisa estar cadastrado na API do WhatsApp (Gerenciador do WhatsApp na BM). Um número que está no aplicativo WhatsApp Business do celular só funciona aqui se estiver em coexistência com a API.</div>
+  </div>
+
+  <div class="card"><h2>2. Mensagem de boas-vindas</h2>
+    <div class="grid2" style="margin-top:10px">
+      <div class="field"><label for="wa_marca">Nome da empresa na mensagem</label><input id="wa_marca" value="${esc(c.marca)}" oninput="waPreview()"></div>
+      <div class="field"><label for="wa_tpl">Nome do modelo (só letras minúsculas e _)</label><input id="wa_tpl" value="${esc(c.tpl)}"></div>
+    </div>
+    <div class="field" style="margin-top:10px"><label for="wa_body">Texto ({{1}} vira o primeiro nome do lead)</label><textarea id="wa_body" style="min-height:130px" oninput="waPreview()">${esc(c.body)}</textarea></div>
+    <div class="field" style="margin-top:10px"><label for="wa_footer">Rodapé</label><input id="wa_footer" value="${esc(c.footer)}" oninput="waPreview()"></div>
+    <div class="field" style="margin-top:12px"><label>Como o lead vai receber</label>
+      <div id="wa_prev" style="background:var(--good-soft);border-radius:10px;padding:12px 14px;max-width:420px;white-space:pre-wrap;font-size:14px"></div></div>
+    <div class="actions" style="margin-top:12px"><button class="primary" onclick="waCreateTpl()">Enviar modelo para aprovação da Meta</button><button onclick="waTplStatus()">Ver status do modelo</button></div>
+    <div id="wa_tplmsg"></div>
+    <div class="note">A Meta costuma aprovar em minutos ou poucas horas. A mensagem só pode ser enviada depois do status <b>Aprovado</b>. Se você mudar o texto, envie de novo com outro nome de modelo.</div>
+  </div>
+
+  <div class="card"><h2>3. Formulários que disparam a mensagem</h2>
+    <div class="actions" style="margin-top:10px"><select id="wa_page" aria-label="Página" onchange="waForms()">${pages.map(p=>`<option value="${p.id}" ${p.id===c.page?'selected':''}>${esc(p.name)}</option>`).join('')||'<option value="">Nenhuma página</option>'}</select></div>
+    <div id="wa_forms" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card"><h2>4. Testar e ligar</h2>
+    <div class="actions" style="margin-top:10px;align-items:end">
+      <div class="field"><label for="wa_test">Seu número para teste</label><input id="wa_test" placeholder="11 99999-9999"></div>
+      <button onclick="waTest()">Enviar teste</button>
+    </div>
+    <label style="font-size:14px;display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="wa_back"> Ao ligar, enviar também para quem se cadastrou nas últimas 2 horas</label>
+    <div class="actions" style="margin-top:12px">${WA_TIMER?'<button class="danger" onclick="waStop()">Desligar envio automático</button>':'<button class="primary" onclick="waStart()">Ligar envio automático</button>'}</div>
+    <div class="note"><b>Importante:</b> o envio automático roda enquanto este painel estiver aberto no navegador. Ele confere novos leads a cada 1 minuto e nunca manda duas vezes para o mesmo lead. Para funcionar 24 horas com o computador desligado, é preciso um pequeno servidor ou uma automação (Make, Zapier ou uma função na nuvem) que posso montar com você.</div>
+    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 6px">Registro de envios</h3>
+    <div id="wa_log"><div class="lead-sub">${Object.keys(waSent()).length} mensagens enviadas até agora por este navegador.</div></div>
+  </div>
+  </details>`;
+  wbUpd();waPreview();if(pages.length)waForms();
+});
+function wbUpd(){const n=($('wb_num').value||'').replace(/\D/g,''),t=$('wb_txt').value;store.set('cm_wb_num',n);store.set('cm_wb_txt',t);const l=`https://wa.me/${n}?text=${encodeURIComponent(t)}`;$('wb_link').textContent=l;$('wb_test').href=l}
+function waPreview(){const c=waSave();$('wa_prev').innerHTML=esc(fillMarca(c.body,c).replace('{{1}}','Maria'))+`<div style="font-size:12px;color:var(--muted);margin-top:8px">${esc(fillMarca(c.footer,c))}</div>`}
+const waFind=guard(async()=>{
+  const bms=await getBms();const out=[];
+  for(const b of bms){const w=await all(`${b.id}/owned_whatsapp_business_accounts`,{fields:'id,name'},50).catch(()=>[]);w.forEach(x=>out.push({...x,bm:b.name}))}
+  if(!out.length)return showErr('appErr','Não encontrei contas do WhatsApp Business nas suas BMs. Confira se o token tem as permissões whatsapp_business_management e whatsapp_business_messaging.');
+  const waba=$('wa_waba').value.trim()||out[0].id;$('wa_waba').value=waba;
+  const nums=await all(`${waba}/phone_numbers`,{fields:'id,display_phone_number,verified_name,quality_rating'},50);
+  $('wa_phone').innerHTML=nums.map(n=>`<option value="${n.id}">${esc(n.display_phone_number)} · ${esc(n.verified_name||'')} · qualidade ${esc(n.quality_rating||'—')}</option>`).join('')||'<option value="">Nenhum número nesta WABA</option>';
+  waSave();toast(`${out.length} WABA(s): ${out.map(x=>x.name+' ('+x.bm+')').join(', ')}`);
+});
+const waCreateTpl=guard(async()=>{
+  const c=waSave();if(!c.waba)return showErr('appErr','Informe a WABA primeiro (passo 1).');
+  if(!/^[a-z0-9_]+$/.test(c.tpl))return showErr('appErr','O nome do modelo só pode ter letras minúsculas, números e _.');
+  const body=fillMarca(c.body,c);if(!body.includes('{{1}}'))return showErr('appErr','Mantenha {{1}} no texto para o nome do lead.');
+  const comps=[{type:'BODY',text:body,example:{body_text:[['Maria']]}}];
+  if(c.footer)comps.push({type:'FOOTER',text:fillMarca(c.footer,c).slice(0,60)});
+  const r=await api(`${c.waba}/message_templates`,{name:c.tpl,language:'pt_BR',category:'UTILITY',components:JSON.stringify(comps)},'POST');
+  $('wa_tplmsg').innerHTML=`<div class="note">Modelo enviado. Status: <b>${esc(r.status||'em análise')}</b>.</div>`;
+});
+const waTplStatus=guard(async()=>{
+  const c=waSave();const r=await api(`${c.waba}/message_templates`,{name:c.tpl,fields:'name,status,category,rejected_reason'});
+  const t=(r.data||[])[0];
+  $('wa_tplmsg').innerHTML=t?`<div class="note">Modelo <b>${esc(t.name)}</b>: ${t.status==='APPROVED'?'<span class="pill p-good">Aprovado</span>':t.status==='REJECTED'?'<span class="pill p-bad">Reprovado</span> '+esc(t.rejected_reason||''):'<span class="pill p-warn">'+esc(t.status)+'</span>'} · categoria ${esc(t.category)}</div>`:'<div class="note">Nenhum modelo com esse nome nesta WABA.</div>';
+});
+const waForms=guard(async()=>{
+  const c=waCfg(),pages=await getPages();const pg=pages.find(p=>p.id===$('wa_page').value);if(!pg)return;
+  const fs=S.demo?DEMO.forms:await all(`${pg.id}/leadgen_forms`,{fields:'name,id,status'},200,pg.access_token);
+  $('wa_forms').innerHTML=fs.map(f=>`<label style="display:flex;gap:8px;align-items:center;font-size:14px;margin:4px 0"><input type="checkbox" class="wa_form" value="${f.id}" ${!c.forms||!c.forms.length||c.forms.includes(f.id)?'checked':''} onchange="waSave()"> ${esc(f.name)} ${statusPill(f.status)}</label>`).join('')||'<p class="muted">Esta página não tem formulários.</p>';
+  waSave();
+});
+async function waSend(c,num,nome){
+  return api(`${c.phone}/messages`,{messaging_product:'whatsapp',to:num,type:'template',
+    template:JSON.stringify({name:c.tpl,language:{code:'pt_BR'},components:[{type:'body',parameters:[{type:'text',text:(nome||'tudo bem').split(' ')[0]}]}]})},'POST');
+}
+const waTest=guard(async()=>{
+  const c=waSave(),n=waNumber($('wa_test').value);if(!c.phone)return showErr('appErr','Escolha o número que envia (passo 1).');if(!n)return showErr('appErr','Digite seu número para o teste.');
+  if(S.demo)return waLog('Exemplo: teste simulado para '+n);
+  await waSend(c,n,'Teste');waLog('Teste enviado para '+n);toast('Teste enviado');
+});
+function waStart(){
+  const c=waSave();
+  if(!c.phone||!c.tpl)return showErr('appErr','Complete os passos 1 e 2 antes de ligar.');
+  if(!c.forms.length)return showErr('appErr','Marque ao menos um formulário no passo 3.');
+  WA_SINCE=Math.floor(Date.now()/1000)-($('wa_back').checked?7200:60);
+  WA_TIMER=setInterval(waTick,60000);waTick();waLog('Envio automático ligado');tWa();
+}
+function waStop(){clearInterval(WA_TIMER);WA_TIMER=null;waLog('Envio automático desligado');tWa()}
+async function waTick(){
+  const c=waCfg();if(S.demo){waLog('Exemplo: nenhuma mensagem real enviada');return}
+  try{
+    const pages=await getPages();const pg=pages.find(p=>p.id===c.page)||{};const sent=waSent();const from=WA_SINCE;WA_SINCE=Math.floor(Date.now()/1000)-30;
+    for(const f of c.forms){
+      const ls=await all(`${f}/leads`,{fields:'id,created_time,field_data',filtering:JSON.stringify([{field:'time_created',operator:'GREATER_THAN',value:from}])},200,pg.access_token);
+      for(const l of ls){
+        if(sent[l.id])continue;const m=fieldMap(l),n=waNumber(pick(m,['phone','telefone','whats','celular'])),nome=pick(m,['full_name','nome','name']);
+        if(!n){sent[l.id]='sem-numero';waLog(`${nome||'Lead'} não deixou telefone`,true);continue}
+        try{await waSend(c,n,nome);sent[l.id]=Date.now();waLog(`Boas-vindas enviada para ${nome||n} (${n})`)}
+        catch(e){waLog(`Falhou para ${nome||n}: ${e.message}`,true)}
+      }
+    }
+    store.set('cm_wa_sent',JSON.stringify(sent));
+  }catch(e){waLog('Erro ao buscar leads: '+e.message,true)}
+}
+
+
+function bmGroups(){
+  const byId=Object.fromEntries(S.accounts.map(a=>[a.id,a]));
+  if(S.bmStruct&&S.bmStruct.length){
+    const gs=S.bmStruct.map(b=>({name:b.name,acc:b.acc.map(id=>byId[id]).filter(Boolean)})).filter(g=>g.acc.length);
+    const inBm=new Set(gs.flatMap(g=>g.acc.map(a=>a.id))),rest=S.accounts.filter(a=>!inBm.has(a.id));
+    if(rest.length)gs.push({name:'Contas pessoais (sem BM)',acc:rest});
+    return gs;
+  }
+  const groups={};S.accounts.forEach(a=>{const k=a.business?a.business.id:'_p';(groups[k]=groups[k]||{name:a.business?a.business.name:'Contas pessoais (sem BM)',acc:[]}).acc.push(a)});
+  return Object.values(groups);
+}
+const BLOCKED=[2,3,7,100,101];
+const isBlocked=a=>BLOCKED.includes(Number(a.account_status));
+function limitsByBm(){
+  const sum=(l,f)=>l.reduce((s,a)=>s+f(a),0);
+  const G={dsl:0,cap:0,capN:0,spent:0,bal:0};
+  const U=S.accounts.filter(a=>!isBlocked(a)),B=S.accounts.filter(isBlocked);G.dsl=sum(U,dslOf);G.cap=sum(U,a=>cents(a.spend_cap));G.capN=U.filter(a=>Number(a.spend_cap)>0).length;G.spent=sum(U,a=>cents(a.amount_spent));G.bal=sum(U,a=>cents(a.balance));
+  const rows=bmGroups().map(g=>{
+    const ok=g.acc.filter(a=>!isBlocked(a));
+    const t={dsl:sum(ok,dslOf),cap:sum(ok,a=>cents(a.spend_cap)),capN:ok.filter(a=>Number(a.spend_cap)>0).length,spent:sum(ok,a=>cents(a.amount_spent)),bal:sum(ok,a=>cents(a.balance))};
+    return `<tr class="bm-row"><td colspan="7"><b>${esc(g.name)}</b> <span class="lead-sub">· ${g.acc.length} conta${g.acc.length>1?'s':''}</span></td></tr>
+    ${g.acc.map(a=>{const d=dslOf(a),bl=isBlocked(a);return `<tr class="${bl?'blocked':''}"><td style="padding-left:20px"><b>${esc(a.name)}</b>${bl?' <span class="pill p-bad">Bloqueada · fora do total</span>':''}<div class="lead-sub mono">act_${a.account_id}</div></td><td>${accStatus(a.account_status)}</td>
+      <td class="r"><input aria-label="Limite diário da Meta" class="dsl-in num" value="${d?d.toLocaleString('pt-BR',{minimumFractionDigits:2}):''}" placeholder="informar" onchange="setDsl('${a.id}',this.value)"></td>
+      <td class="r num">${Number(a.spend_cap)?money(cents(a.spend_cap),a.currency):'<span class="muted">Sem limite</span>'}</td>
+      <td class="r num">${money(cents(a.amount_spent),a.currency)}</td>
+      <td class="r num" style="color:${Number(a.balance)>0?'var(--warn)':'inherit'}">${money(cents(a.balance),a.currency)}</td>
+      <td><div class="actions"><button class="sm" onclick="selectAccount('${a.id}');document.querySelector('[data-t=overview]').click()">Abrir</button><a href="${payUrl(a)}" target="_blank" rel="noopener"><button class="sm ${Number(a.balance)>0?'primary':''}" tabindex="-1">${Number(a.balance)>0?'Pagar':'Ver limite'}</button></a></div><div class="lead-sub">${esc((a.funding_source_details||{}).display_string||'')}</div></td></tr>`}).join('')}
+    <tr class="sub-row"><td colspan="2">Subtotal ${esc(g.name.split(',')[0])}${g.acc.length-ok.length?` <span class="lead-sub">(sem ${g.acc.length-ok.length} bloqueada${g.acc.length-ok.length>1?'s':''})</span>`:''}</td><td class="r num">${t.dsl?money(t.dsl):'—'}/dia</td><td class="r num">${t.capN?money(t.cap):'Sem limite'}</td><td class="r num">${money(t.spent)}</td><td class="r num">${money(t.bal)}</td><td></td></tr>`;
+  }).join('');
+  return `<div class="card"><div class="card-h"><h2>Limites por BM</h2><span class="muted" style="font-size:13px">${S.accounts.length} contas</span></div>
+  <div class="tbl"><table><thead><tr><th>Conta</th><th>Status</th><th class="r">Limite diário (Meta)</th><th class="r">Limite da conta</th><th class="r">Gasto total</th><th class="r">Pendente</th><th></th></tr></thead><tbody>
+  ${rows}
+  <tr class="total-row"><td colspan="2">TOTAL GERAL <span style="font-weight:400;opacity:.8;font-size:12px">· ${U.length} contas ativas, sem repetir</span></td><td class="r num">${G.dsl?money(G.dsl):'—'}/dia</td><td class="r num">${G.capN?money(G.cap):'Sem limite'}</td><td class="r num">${money(G.spent)}</td><td class="r num">${money(G.bal)}</td><td></td></tr>
+  ${B.length?`<tr class="blocked-sum"><td colspan="2">Contas bloqueadas (${B.length}) · não somadas</td><td class="r num">${money(sum(B,dslOf))}/dia</td><td></td><td class="r num">${money(sum(B,a=>cents(a.amount_spent)))}</td><td class="r num">${money(sum(B,a=>cents(a.balance)))}</td><td></td></tr>`:''}
+  </tbody></table></div>
+  ${B.length?`<div class="err">Bloqueadas: ${B.map(a=>esc(a.name)+' ('+accStatus(a.account_status).replace(/<[^>]+>/g,'')+')').join(', ')}. Elas ficam fora do total geral. Para liberar, abra a conta no Gerenciador e veja o motivo em Qualidade da conta.</div>`:''}
+  <div class="note"><b>Limite diário (Meta)</b>: quanto a Meta deixa cada conta gastar por dia. Valores lidos na página de cobrança da Meta em 19/10/2026; a Meta aumenta esse limite com o tempo, então se mudar, é só digitar o novo valor no campo. A API não envia esse número: clique em "Ver limite", copie o valor de "Limite de gastos diário (definido pela Meta)" e digite no campo. O painel guarda e soma. Uma conta compartilhada entre duas BMs aparece nas duas, mas entra uma vez só no total geral. <b>Limite da conta</b>: o teto que você define; "Sem limite" quando não há teto.</div></div>`;
+}
+
+/* ---------- Ativar com orçamento ---------- */
+const brl=v=>{const n=Number(String(v).replace(/\./g,'').replace(',','.'));return isNaN(n)?NaN:n};
+const fmtIn=c=>c?(Number(c)/100).toLocaleString('pt-BR',{minimumFractionDigits:2}):'';
+const activateWithBudget=guard(async(id,name)=>{
+  $('modalRoot').innerHTML=`<div class="modal" role="dialog" aria-modal="true"><div class="box" style="max-width:560px"><h2>Ativar: ${esc(name)}</h2><div id="abBody" class="muted" style="margin-top:8px">Carregando orçamento…</div></div></div>`;
+  let camp,sets;
+  if(S.demo){const c=DEMO.campaigns.find(x=>x.id===id);camp={id,daily_budget:c.daily_budget,lifetime_budget:c.lifetime_budget};sets=c.daily_budget||c.lifetime_budget?[]:[{id:id+'s1',name:'Conjunto 1',status:'PAUSED',daily_budget:5000}]}
+  else{[camp,sets]=await Promise.all([api(id,{fields:'daily_budget,lifetime_budget,budget_remaining'}),all(`${id}/adsets`,{fields:'name,status,effective_status,daily_budget,lifetime_budget,end_time'},100)])}
+  const cbo=!!(Number(camp.daily_budget)||Number(camp.lifetime_budget));
+  const lim=S.acc?dslOf(S.acc):0;
+  const row=(key,label,o,extra='')=>{const life=Number(o.lifetime_budget)>0;return `<div class="ab-row"><div style="min-width:0"><b>${esc(label)}</b>${extra}<div class="lead-sub">${life?'Orçamento total (vitalício)':'Orçamento diário'} · atual ${money((Number(o.daily_budget)||Number(o.lifetime_budget))/100)}</div></div>
+    <div class="field" style="width:150px"><label for="ab_${key}">${life?'Novo total (R$)':'Novo por dia (R$)'}</label><input id="ab_${key}" class="ab-in num" data-kind="${life?'lifetime':'daily'}" data-target="${o.id}" value="${fmtIn(o.daily_budget||o.lifetime_budget)}" oninput="abSum()"></div></div>`};
+  const body=cbo?row('c','Orçamento da campanha',{...camp,id}):sets.length?sets.map((s,i)=>row('s'+i,s.name,s,s.status!=='ACTIVE'?' <span class="pill p-mut">pausado</span>':'')).join(''):'<p>Esta campanha não tem conjuntos de anúncios.</p>';
+  $('abBody').classList.remove('muted');
+  $('abBody').innerHTML=`<p class="muted" style="margin:0 0 10px;font-size:14px">${cbo?'O orçamento fica na campanha (Advantage+).':'O orçamento fica em cada conjunto de anúncios.'} Ajuste o valor e ative.</p>
+    ${body}
+    <div id="abTotal" class="note" style="margin-top:12px"></div>
+    ${!cbo&&sets.some(s=>s.status!=='ACTIVE')?'<label style="display:flex;gap:8px;align-items:center;font-size:14px;margin-top:10px"><input type="checkbox" id="abSets" checked> Ativar também os conjuntos pausados</label>':''}
+    <div class="actions" style="margin-top:14px;justify-content:flex-end"><button onclick="closeModal()">Cancelar</button><button class="primary" id="abOk">Salvar orçamento e ativar</button></div>`;
+  S._ab={id,name,lim,sets};abSum();
+  $('abOk').onclick=abRun;
+});
+function abSum(){
+  const ins=[...document.querySelectorAll('.ab-in')];let day=0,bad=false;
+  let life=0;ins.forEach(i=>{const v=brl(i.value);if(isNaN(v)||v<5)bad=true;else if(i.dataset.kind==='daily')day+=v;else life+=v});
+  const lim=S._ab&&S._ab.lim;
+  $('abTotal').innerHTML=bad?'<b style="color:var(--bad)">Informe um valor de pelo menos R$ 5,00 em cada campo.</b>':
+    (life&&!day?`Orçamento total: <b>${money(life)}</b>, distribuído pela Meta até a data de término.`:`Total diário: <b>${money(day)}</b>${lim?` · limite diário da conta: ${money(lim)}${day>lim?' <b style="color:var(--bad)">— acima do limite, a Meta não vai gastar tudo</b>':''}`:''}`);
+  if($('abOk'))$('abOk').disabled=bad;
+}
+async function abRun(){
+  const {id,name,sets}=S._ab;const ins=[...document.querySelectorAll('.ab-in')];
+  const plan=ins.map(i=>({target:i.dataset.target,kind:i.dataset.kind,v:Math.round(brl(i.value)*100)}));
+  const actSets=$('abSets')?$('abSets').checked:false;
+  closeModal();
+  if(S.demo){const c=DEMO.campaigns.find(x=>x.id===id);c.status=c.effective_status='ACTIVE';if(c.daily_budget)c.daily_budget=plan[0].v;toast('Exemplo: orçamento salvo e campanha ativada');return tCampaigns()}
+  try{
+    for(const p of plan)await api(p.target,{[p.kind==='daily'?'daily_budget':'lifetime_budget']:String(p.v)},'POST');
+    if(actSets)for(const s of sets)if(s.status!=='ACTIVE')await api(s.id,{status:'ACTIVE'},'POST');
+    await api(id,{status:'ACTIVE'},'POST');
+    toast('Orçamento salvo e campanha ativada');delete S.cache['cp'+S.period];tCampaigns();
+  }catch(e){showErr('appErr','Não consegui concluir: '+e.message+' O que já foi salvo continua salvo; confira a campanha antes de tentar de novo.')}
+}
+/* ---------- Caixa de entrada: Messenger, Instagram Direct e WhatsApp ---------- */
+const IB_PERMS=['pages_show_list','pages_messaging','pages_read_engagement','pages_manage_metadata','instagram_basic','instagram_manage_messages','whatsapp_business_management','whatsapp_business_messaging'];
+const IB={ch:store.get('cm_ib_ch')||'messenger',conv:null,list:[],timer:null};
+const H24=864e5;
+const ibPage=pages=>{const want=store.get('cm_ib_page')||'';return pages.find(p=>p.id===want)||pages[0]||null};
+const ibMine=pg=>[pg.id,(pg.instagram_business_account||{}).id].filter(Boolean);
+const ibWho=(c,pg)=>{const ps=(c.participants||{}).data||[],me=ibMine(pg);const o=ps.find(p=>!me.includes(p.id))||{};return{id:o.id||'',name:o.name||(o.username?'@'+o.username:'Cliente')}};
+const ibLeft=age=>Math.max(1,Math.round((H24-age)/36e5))+'h restantes';
+const ibWaOut=()=>{try{return JSON.parse(store.get('cm_wa_out')||'[]')}catch(e){return[]}};
+function ibSet(k){IB.ch=k;IB.conv=null;store.set('cm_ib_ch',k);tInbox()}
+
+async function ibChecklist(pg){
+  let granted=new Set(IB_PERMS);
+  if(!S.demo){try{const j=await api('me/permissions');granted=new Set((j.data||[]).filter(x=>x.status==='granted').map(x=>x.permission))}catch(e){}}
+  const miss=IB_PERMS.filter(p=>!granted.has(p)),wc=waCfg(),ig=pg&&pg.instagram_business_account;
+  const pill={ok:'<span class="pill p-good">Pronto</span>',no:'<span class="pill p-warn">Falta</span>',chk:'<span class="pill p-mut">Conferir</span>'};
+  const step=(st,t,d)=>`<div class="ib-step">${pill[st]}<div style="min-width:0"><b>${t}</b><div class="lead-sub">${d}</div></div></div>`;
+  const a=(u,t)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+  const steps=[
+    step(miss.length?'no':'ok','Permissões de mensagens no token',miss.length?`Faltam: <span class="mono">${esc(miss.join(', '))}</span>. Gere o token de novo no ${a('https://developers.facebook.com/tools/explorer/','Graph API Explorer')} com a lista da tela de conexão (botão Sair → Copiar permissões).`:'O token tem as permissões de Messenger, Instagram e WhatsApp.'),
+    step(pg?'ok':'no','Página do Facebook',pg?esc(pg.name):'Nenhuma página no token. Marque as páginas ao gerar o token.'),
+    step(ig?'ok':'no','Instagram profissional ligado à página',ig?'@'+esc(ig.username)+'. No app do Instagram, deixe ligado: Configurações → Mensagens e respostas → Ferramentas conectadas → Permitir acesso às mensagens.':'Ligue o Instagram à página em Configurações da página → Contas vinculadas.'),
+    step(wc.phone?'ok':'no','Número do WhatsApp na API (coexistência com o app)',wc.phone?'Número escolhido na aba WhatsApp.':`No ${a('https://business.facebook.com/wa/manage/home/','Gerenciador do WhatsApp')}: Adicionar número → usar o número do app WhatsApp Business → confirme no celular. Depois, na aba WhatsApp, abra "Envio pela API oficial" e clique em "Buscar WABA e números".`),
+    step('chk','Forma de pagamento do WhatsApp',`Só para mensagens de modelo, que você inicia. Cadastre em ${a('https://business.facebook.com/wa/manage/home/','Gerenciador do WhatsApp')} → Configurações de pagamento. Responder em até 24h é grátis.`),
+    step('chk','App no modo Ativo e Acesso avançado',`Em ${a('https://developers.facebook.com/apps/','developers.facebook.com/apps')}: deixe o app em modo Ativo e peça Acesso avançado para pages_messaging e instagram_manage_messages (Análise do app). Até ser aprovado, só funciona com pessoas que têm função no app. Para responder depois de 24h, peça também o recurso Human Agent.`)];
+  return {html:steps.join(''),pend:miss.length||!pg||!ig||!wc.phone};
+}
+
+const tInbox=guard(async()=>{
+  const pages=await getPages().catch(()=>[]),pg=ibPage(pages);
+  const chs=[['messenger','Messenger'],['instagram','Instagram Direct'],['whatsapp','WhatsApp']];
+  $('tabBody').innerHTML=`<div class="card" style="margin-top:0"><div class="card-h"><h2>Caixa de entrada</h2>
+    <div class="actions">${chs.map(([k,t])=>`<button class="sm ${IB.ch===k?'primary':''}" onclick="ibSet('${k}')">${t}</button>`).join('')}
+    ${IB.ch!=='whatsapp'&&pages.length?`<select id="ib_pg" aria-label="Página" onchange="store.set('cm_ib_page',this.value);IB.conv=null;tInbox()">${pages.map(p=>`<option value="${p.id}" ${pg&&p.id===pg.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select><button class="sm" onclick="ibLoad()">Atualizar</button>`:''}</div></div>
+    <div id="ib_body"></div></div>
+    <details class="card" id="ib_cfg"><summary style="cursor:pointer;font-weight:600">Configuração da API <span id="ib_cfgPill"></span></summary><div id="ib_check" class="muted" style="margin-top:10px">Verificando…</div></details>`;
+  ibChecklist(pg).then(r=>{if(!$('ib_check'))return;$('ib_check').classList.remove('muted');$('ib_check').innerHTML=r.html;$('ib_cfgPill').innerHTML=r.pend?'<span class="pill p-warn">Falta configurar</span>':'<span class="pill p-good">Pronto</span>';if(r.pend)$('ib_cfg').open=true});
+  if(IB.ch==='whatsapp')return ibWa();
+  if(!pg){$('ib_body').innerHTML='<p class="muted">Nenhuma página encontrada. Gere o token marcando as páginas.</p>';return}
+  if(IB.ch==='instagram'&&!pg.instagram_business_account){$('ib_body').innerHTML='<p class="muted">Esta página não tem Instagram profissional ligado. Escolha outra página ou ligue o Instagram nas configurações da página.</p>';return}
+  $('ib_body').innerHTML=`<div class="ib"><div class="ib-list" id="ib_list"><p class="muted" style="padding:10px">Buscando conversas…</p></div><div id="ib_conv"><p class="muted">Escolha uma conversa.</p></div></div>
+    <div class="lead-sub" style="margin-top:8px">Atualiza sozinho a cada 1 minuto enquanto esta aba estiver aberta.</div>`;
+  await ibLoad();ibTimer();
+});
+
+async function ibLoad(){
+  const pg=ibPage(await getPages().catch(()=>[]));if(!pg||!$('ib_list'))return;
+  try{
+    IB.list=S.demo?(DEMO.inbox[IB.ch]||[]):await all(`${pg.id}/conversations`,{platform:IB.ch,fields:'id,updated_time,unread_count,snippet,participants'},100,pg.access_token);
+  }catch(e){$('ib_list').innerHTML=`<div class="err" style="margin:10px">${esc(e.message)}</div><p class="lead-sub" style="padding:0 10px">Confira os itens de "Configuração da API" abaixo.</p>`;return}
+  IB.list.sort((a,b)=>new Date(b.updated_time)-new Date(a.updated_time));
+  $('ib_list').innerHTML=IB.list.map((c,i)=>{const w=ibWho(c,pg);return `<button class="ib-item ${IB.conv===c.id?'on':''}" onclick="ibOpen(${i})"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(w.name)}</b><span class="lead-sub" style="white-space:nowrap">${dt(c.updated_time)}</span></div><div class="lead-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.snippet||'')}</div>${c.unread_count?`<span class="pill p-warn" style="margin-top:4px">${c.unread_count} nova${c.unread_count>1?'s':''}</span>`:''}</button>`}).join('')||'<p class="muted" style="padding:10px">Nenhuma conversa.</p>';
+  const i=IB.list.findIndex(c=>c.id===IB.conv);if(i>=0)ibOpen(i,true);
+}
+
+async function ibOpen(i,keep){
+  const pg=ibPage(await getPages()),c=IB.list[i];if(!c||!$('ib_conv'))return;IB.conv=c.id;
+  document.querySelectorAll('.ib-item').forEach((b,j)=>b.classList.toggle('on',j===i));
+  const w=ibWho(c,pg),me=ibMine(pg),draft=$('ib_txt')?$('ib_txt').value:'';
+  if(!keep)$('ib_conv').innerHTML='<p class="muted">Carregando mensagens…</p>';
+  try{
+    const ms=S.demo?c._msgs:(((await api(c.id,{fields:'messages.limit(40){id,message,from,created_time,attachments{image_data,file_url,name}}'},'GET',pg.access_token)).messages||{}).data||[]);
+    const list=ms.slice().sort((a,b)=>new Date(a.created_time)-new Date(b.created_time));
+    const lastIn=[...list].reverse().find(m=>!me.includes((m.from||{}).id));
+    const age=lastIn?Date.now()-new Date(lastIn.created_time):Infinity;
+    const att=m=>((m.attachments||{}).data||[]).map(a=>a.image_data?`<a href="${esc(a.image_data.url)}" target="_blank" rel="noopener"><img src="${esc(a.image_data.preview_url||a.image_data.url)}" alt="Imagem da conversa" style="max-width:180px;border-radius:8px;display:block;margin-top:4px"></a>`:`<a href="${esc(a.file_url||'#')}" target="_blank" rel="noopener" style="color:inherit">${esc(a.name||'Anexo')}</a>`).join('');
+    $('ib_conv').innerHTML=`<div class="card-h"><h3 style="font-size:15px">${esc(w.name)}</h3>${age<H24?`<span class="pill p-good">Pode responder · ${ibLeft(age)}</span>`:age<7*H24?'<span class="pill p-warn">Passou de 24h · resposta como atendimento humano</span>':'<span class="pill p-bad">Mais de 7 dias sem mensagem do cliente</span>'}</div>
+      <div class="ib-thread" id="ib_thread">${list.map(m=>{const out=me.includes((m.from||{}).id);return `<div class="msg ${out?'out':'in'}">${esc(m.message||'')}${att(m)}<div class="t">${dt(m.created_time)}</div></div>`}).join('')||'<p class="muted">Sem mensagens.</p>'}</div>
+      ${age<7*H24?`<div style="display:flex;gap:8px;margin-top:10px;align-items:end"><textarea id="ib_txt" aria-label="Resposta" placeholder="Escreva a resposta" style="min-height:52px"></textarea><button class="primary" data-to="${esc(w.id)}" onclick="ibSend(this.dataset.to,${age>=H24})">Enviar</button></div>`:'<div class="note">A Meta só deixa responder até 7 dias depois da última mensagem do cliente. Espere ele escrever de novo ou chame pelo telefone.</div>'}`;
+    if($('ib_txt'))$('ib_txt').value=draft;
+    const th=$('ib_thread');th.scrollTop=th.scrollHeight;
+    if(c.unread_count&&!S.demo&&w.id){api(`${pg.id}/messages`,{recipient:JSON.stringify({id:w.id}),sender_action:'mark_seen'},'POST',pg.access_token).catch(()=>{});c.unread_count=0}
+  }catch(e){$('ib_conv').innerHTML=`<div class="err">${esc(e.message)}</div>`}
+}
+
+async function ibSend(id,late){
+  const t=$('ib_txt').value.trim();if(!t)return;
+  const pg=ibPage(await getPages());
+  if(S.demo){const c=IB.list.find(x=>x.id===IB.conv);c._msgs.push({id:'d'+Date.now(),message:t,from:{id:pg.id},created_time:new Date().toISOString()});c.snippet=t;c.updated_time=new Date().toISOString();$('ib_txt').value='';toast('Exemplo: nada foi enviado');return ibLoad()}
+  const p={recipient:JSON.stringify({id}),message:JSON.stringify({text:t})};
+  if(late){p.messaging_type='MESSAGE_TAG';p.tag='HUMAN_AGENT'}else p.messaging_type='RESPONSE';
+  try{await api(`${pg.id}/messages`,p,'POST',pg.access_token);$('ib_txt').value='';toast('Mensagem enviada');ibLoad()}
+  catch(e){showErr('appErr','Não enviou: '+e.message+(late?' Depois de 24h a Meta exige o recurso Human Agent aprovado no app.':''))}
+}
+
+function ibTimer(){clearInterval(IB.timer);IB.timer=setInterval(()=>{
+  if(S.tab!=='inbox'||!($('ib_list')||$('wa_list'))){clearInterval(IB.timer);return}
+  const f=document.activeElement;if(f&&(f.id==='ib_txt'||f.id==='wa_txt')&&f.value)return;
+  IB.ch==='whatsapp'?waLoad():ibLoad();
+},60000)}
+
+const WA_HOOK_DEF='',WA_KEY_DEF='';
+const waHook=()=>({url:store.get('cm_wa_hook')||WA_HOOK_DEF,key:store.get('cm_wa_key')||WA_KEY_DEF});
+const WA={list:[],sel:null};
+const waTick2=s=>s==='read'?'<span style="color:#7fd4ff">✓✓ lida</span>':s==='delivered'?'✓✓ entregue':s==='sent'?'✓ enviada':s==='failed'?'<b style="color:#ffd0cc">❗ falhou</b>':s?esc(s):'🕓';
+async function waEvents(){
+  if(S.demo)return DEMO.waEvents||[];
+  const h=waHook();if(!h.url||!h.key)throw new Error('Configure a URL e a chave do seu webhook (abaixo) para ver as conversas do WhatsApp.');const r=await fetch(`${h.url}?acao=lista&chave=${encodeURIComponent(h.key)}&limite=1000`);const j=await r.json();
+  if(j.erro)throw new Error('Webhook: '+j.erro);return j.eventos||[];
+}
+function waBuild(ev){
+  const conv={},st={},dig=n=>String(n||'').replace(/\D/g,'');
+  const get=n=>conv[n]=conv[n]||{num:n,nome:'',msgs:[],lastIn:0};
+  ev.forEach(e=>{const n=dig(e.numero);if(!n)return;
+    if(e.tipo==='status'){st[e.id]={s:e.status,erro:e.erro_codigo?`${e.erro_codigo} · ${e.erro_titulo}${e.erro_detalhe?' · '+e.erro_detalhe:''}`:''};return}
+    const c=get(n),t=new Date(e.em).getTime();
+    if(e.tipo==='recebida'){c.msgs.push({in:1,t,txt:e.texto,id:e.id});if(e.nome)c.nome=e.nome;c.lastIn=Math.max(c.lastIn,t)}
+    else if(e.tipo==='enviada pelo app')c.msgs.push({in:0,t,txt:e.texto,id:e.id,app:1});
+  });
+  ibWaOut().forEach(o=>{const n=dig(o.to);if(!n)return;const c=get(n);if(o.id&&c.msgs.some(m=>m.id===o.id))return;c.msgs.push({in:0,t:new Date(o.at).getTime(),txt:o.t,id:o.id})});
+  return Object.values(conv).map(c=>{c.msgs.sort((a,b)=>a.t-b.t);c.msgs.forEach(m=>{if(!m.in&&st[m.id]){m.st=st[m.id].s;m.erro=st[m.id].erro}});c.last=c.msgs.length?c.msgs[c.msgs.length-1].t:0;return c}).sort((a,b)=>b.last-a.last);
+}
+function ibWa(){
+  const c=waCfg(),h=waHook();
+  $('ib_body').innerHTML=`${c.phone||S.demo?'':'<div class="note" style="margin-top:0">Escolha o número da API na aba WhatsApp ("Envio pela API oficial" → passo 1) para responder daqui.</div>'}
+    <div class="ib"><div class="ib-list" id="wa_list"><p class="muted" style="padding:10px">Buscando conversas…</p></div><div id="wa_conv"><p class="muted">Escolha uma conversa.</p></div></div>
+    <div class="lead-sub" style="margin-top:8px">Atualiza sozinho a cada 1 minuto. As mensagens chegam pelo webhook (planilha no seu Google).</div>
+    <details class="card" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600">Nova conversa (modelo aprovado)</summary>
+      <div class="grid2" style="margin-top:10px">
+        <div class="field"><label for="ibw_to">Número do cliente (com DDD)</label><input id="ibw_to" placeholder="11 99999-9999"></div>
+        <div class="field"><label for="ibw_name">Nome do cliente</label><input id="ibw_name" placeholder="Maria"></div>
+      </div>
+      <div class="actions" style="margin-top:10px"><button class="primary" onclick="ibWaSend(waNumber($('ibw_to').value),'tpl','',$('ibw_name').value.trim())">Enviar modelo "${esc(c.tpl)}"</button></div>
+      <div class="note">Para quem não escreveu nas últimas 24 horas, a Meta só aceita modelo aprovado, e cobra por mensagem.</div></details>
+    <details class="card"><summary style="cursor:pointer;font-weight:600">Webhook</summary>
+      <div class="grid2" style="margin-top:10px">
+        <div class="field"><label for="wa_hook">URL do webhook (Apps Script)</label><input id="wa_hook" value="${esc(h.url)}" onchange="store.set('cm_wa_hook',this.value.trim());waLoad()"></div>
+        <div class="field"><label for="wa_key">Chave de leitura</label><input id="wa_key" value="${esc(h.key)}" onchange="store.set('cm_wa_key',this.value.trim());waLoad()"></div>
+      </div></details>`;
+  waLoad();ibTimer();
+}
+async function waLoad(){
+  if(!$('wa_list'))return;
+  try{WA.list=waBuild(await waEvents())}catch(e){$('wa_list').innerHTML=`<div class="err" style="margin:10px">${esc(e.message||'Não consegui ler o webhook.')}</div>`;return}
+  $('wa_list').innerHTML=WA.list.map(c=>{const m=c.msgs[c.msgs.length-1]||{};const novo=m.in&&m.t>Number(store.get('cm_wa_seen_'+c.num)||0);return `<button class="ib-item ${WA.sel===c.num?'on':''}" data-num="${c.num}" onclick="waOpen(this.dataset.num)"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(c.nome||'+'+c.num)}</b><span class="lead-sub" style="white-space:nowrap">${dt(c.last)}</span></div><div class="lead-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.in?'':'Você: '}${esc(m.txt||'')}</div>${novo?'<span class="pill p-warn" style="margin-top:4px">nova</span>':''}</button>`}).join('')||'<p class="muted" style="padding:10px">Nenhuma conversa ainda. Quando alguém mandar mensagem para o número, ela aparece aqui.</p>';
+  if(WA.sel)waOpen(WA.sel,true);
+}
+function waOpen(num){
+  const c=WA.list.find(x=>x.num===num);if(!c||!$('wa_conv'))return;WA.sel=num;
+  document.querySelectorAll('#wa_list .ib-item').forEach(b=>b.classList.toggle('on',b.dataset.num===num));
+  if(c.msgs.length)store.set('cm_wa_seen_'+num,String(c.msgs[c.msgs.length-1].t));
+  const age=c.lastIn?Date.now()-c.lastIn:Infinity,draft=$('wa_txt')?$('wa_txt').value:'';
+  $('wa_conv').innerHTML=`<div class="card-h"><h3 style="font-size:15px">${esc(c.nome||'+'+c.num)} <span class="lead-sub mono">+${esc(c.num)}</span></h3>${age<H24?`<span class="pill p-good">Pode responder · ${ibLeft(age)}</span>`:'<span class="pill p-warn">Passou de 24h · só modelo</span>'}</div>
+    <div class="ib-thread" id="wa_thread">${c.msgs.map(m=>`<div class="msg ${m.in?'in':'out'}">${esc(m.txt||'')}<div class="t">${dt(m.t)}${m.in?'':' · '+(m.app?'pelo celular':waTick2(m.st))}</div>${m.erro?`<div class="t" style="opacity:1">${esc(m.erro)}</div>`:''}</div>`).join('')}</div>
+    ${age<H24?`<div style="display:flex;gap:8px;margin-top:10px;align-items:end"><textarea id="wa_txt" aria-label="Resposta" placeholder="Escreva a resposta" style="min-height:52px"></textarea><button class="primary" onclick="ibWaSend(WA.sel,'text',$('wa_txt').value.trim())">Enviar</button></div>`:`<div class="actions" style="margin-top:10px"><button class="primary" onclick="ibWaSend(WA.sel,'tpl','',(WA.list.find(x=>x.num===WA.sel)||{}).nome||'')">Enviar modelo "${esc(waCfg().tpl)}"</button></div>`}`;
+  if($('wa_txt'))$('wa_txt').value=draft;
+  const th=$('wa_thread');th.scrollTop=th.scrollHeight;
+}
+function ibWaSend(to,mode,txt,nome){
+  const c=waCfg();
+  if(!c.phone&&!S.demo)return showErr('appErr','Escolha o número da API na aba WhatsApp antes de enviar.');
+  if(!to)return showErr('appErr','Digite o número do cliente.');
+  if(mode==='text'&&!txt)return showErr('appErr','Escreva a mensagem.');
+  showErr('appErr','');
+  const go=async()=>{
+    const log=id=>{const o=ibWaOut();o.unshift({to,t:mode==='tpl'?'Modelo '+c.tpl+(nome?' ('+nome+')':''):txt,at:new Date().toISOString(),id});store.set('cm_wa_out',JSON.stringify(o.slice(0,300)))};
+    if(S.demo){log('demo'+Date.now());toast('Exemplo: nada foi enviado');if($('wa_txt'))$('wa_txt').value='';WA.sel=to;return waLoad()}
+    try{const r=mode==='tpl'?await waSend(c,to,nome):await api(`${c.phone}/messages`,{messaging_product:'whatsapp',to,type:'text',text:JSON.stringify({body:txt})},'POST');
+      log(((r.messages||[])[0]||{}).id);if($('wa_txt'))$('wa_txt').value='';toast('Mensagem enviada');WA.sel=to;waLoad()}
+    catch(e){showErr('appErr','Não enviou: '+e.message)}
+  };
+  if(mode==='tpl')confirmBox('Enviar modelo?',`Envia o modelo <b>${esc(c.tpl)}</b> para <span class="mono">+${esc(to)}</span>. A Meta cobra esta mensagem.`,'Enviar',go);else go();
+}
+
+/* ---------- Dados de exemplo ---------- */
+function startDemo(){
+  S.demo=true;
+  const d=n=>{const x=new Date();x.setDate(x.getDate()-n);return x};
+  const A=(p,l,ck)=>[{action_type:'omni_purchase',value:p},{action_type:'lead',value:l},{action_type:'omni_initiated_checkout',value:ck},{action_type:'onsite_conversion.messaging_conversation_started_7d',value:Math.round(l/2)}];
+  const V=v=>[{action_type:'omni_purchase',value:v}];
+  S.accounts=[{id:'act_1001',account_id:'1001',name:'Exemplo · Conta Principal',account_status:1,currency:'BRL',amount_spent:'4825090',balance:'31250',spend_cap:'6000000',adtrust_dsl:1500,funding_source_details:{display_string:'Visa final 0000 (exemplo)'},business:{name:'Exemplo BM',id:'9001'},timezone_name:'America/Sao_Paulo'},{id:'act_1002',account_id:'1002',name:'Exemplo · Conta Reserva',account_status:3,currency:'BRL',amount_spent:'120000',balance:'8900',business:{name:'Exemplo BM',id:'9001'}}];
+  const days=[...Array(30)].map((_,i)=>{const s=180+Math.round(Math.sin(i/3)*60+i*4),p=Math.round(s/38);return{date_start:d(29-i).toISOString().slice(0,10),spend:s,actions:A(p,p*3,p*2),action_values:V(p*97)}});
+  DEMO.overview={tot:{spend:days.reduce((a,x)=>a+x.spend,0),impressions:412300,inline_link_clicks:8120,ctr:2.14,cpc:0.86,actions:A(184,560,402),action_values:V(17890)},days};
+  DEMO.campaigns=[
+    {id:'2201',name:'[Exemplo] Vendas · Público quente',status:'ACTIVE',effective_status:'ACTIVE',objective:'OUTCOME_SALES',daily_budget:15000,insights:{data:[{spend:3120.4,ctr:2.6,actions:A(112,0,240),action_values:V(11020)}]}},
+    {id:'2202',name:'[Exemplo] Cadastro · Formulário instantâneo',status:'ACTIVE',effective_status:'ACTIVE',objective:'OUTCOME_LEADS',daily_budget:8000,insights:{data:[{spend:1980.1,ctr:1.9,actions:A(18,520,40),action_values:V(1740)}]}},
+    {id:'2204',name:'[Exemplo] Teste público frio',status:'ACTIVE',effective_status:'ACTIVE',objective:'OUTCOME_LEADS',daily_budget:3000,insights:{data:[{spend:96.5,ctr:0.9,actions:[],action_values:[]}]}},
+    {id:'2203',name:'[Exemplo] Remarketing 7 dias',status:'PAUSED',effective_status:'PAUSED',objective:'OUTCOME_SALES',lifetime_budget:200000,insights:{data:[{spend:890,ctr:3.1,actions:A(54,0,90),action_values:V(5130)}]}}];
+  DEMO.pixels=[{id:'778899',name:'Pixel Exemplo Site',last_fired_time:d(0).toISOString(),owner_business:{name:'Exemplo BM',id:'9001'}},{id:'778900',name:'Pixel Exemplo Antigo',last_fired_time:d(12).toISOString(),owner_business:{name:'Exemplo BM',id:'9001'}}];
+  DEMO.pxstats=[['PageView',5321],['ViewContent',1870],['InitiateCheckout',402],['Purchase',61],['Lead',38]];
+  DEMO.pages=[{id:'5501',name:'Exemplo Página',category:'Entretenimento',fan_count:12400,instagram_business_account:{id:'ig5501',username:'exemplo.loja',followers_count:38200,media_count:412}}];
+  DEMO.forms=[{id:'f1',name:'[Exemplo] Cadastro promoção',status:'ACTIVE',leads_count:3,created_time:d(20).toISOString()}];
+  DEMO.leads=[
+    {form:'f1',id:'L1',created_time:d(0).toISOString(),campaign_name:'[Exemplo] Cadastro · Formulário instantâneo',platform:'ig',field_data:[{name:'full_name',values:['Maria Exemplo']},{name:'phone_number',values:['+5511900000001']},{name:'email',values:['maria@exemplo.com']},{name:'qual_seu_@_do_instagram',values:['@maria.exemplo']}]},
+    {form:'f1',id:'L2',created_time:d(1).toISOString(),campaign_name:'[Exemplo] Cadastro · Formulário instantâneo',platform:'fb',field_data:[{name:'full_name',values:['João Exemplo']},{name:'phone_number',values:['11900000002']},{name:'cidade',values:['São Paulo']}]},
+    {form:'f1',id:'L3',created_time:d(2).toISOString(),campaign_name:'[Exemplo] Cadastro · Formulário instantâneo',platform:'ig',field_data:[{name:'full_name',values:['Ana Exemplo']},{name:'email',values:['ana@exemplo.com']}]}];
+  DEMO.ads=[
+    {id:'a1',name:'[Exemplo] Vídeo depoimento',status:'ACTIVE',effective_status:'ACTIVE',campaign:{name:'[Exemplo] Cadastro · Formulário instantâneo'},creative:{title:'Veja o que dizem',object_story_spec:{link_data:{link:'https://example.com/cadastro',call_to_action:{type:'SIGN_UP',value:{lead_gen_form_id:'f1'}}}}},insights:{data:[{spend:620,impressions:41000,inline_link_clicks:980,ctr:2.4,actions:A(4,62,8)}]}},
+    {id:'a2',name:'[Exemplo] Carrossel produtos',status:'ACTIVE',effective_status:'ACTIVE',campaign:{name:'[Exemplo] Vendas · Público quente'},creative:{title:'Escolha o seu',url_tags:'utm_source=meta',object_story_spec:{link_data:{link:'https://example.com/loja',call_to_action:{type:'SHOP_NOW',value:{link:'https://example.com/loja'}}}}},insights:{data:[{spend:1480,impressions:88000,inline_link_clicks:2100,ctr:2.39,actions:A(60,30,120)}]}},
+    {id:'a3',name:'[Exemplo] Imagem oferta',status:'ACTIVE',effective_status:'ACTIVE',campaign:{name:'[Exemplo] Cadastro · Formulário instantâneo'},creative:{title:'Condição especial'},insights:{data:[{spend:910,impressions:52000,inline_link_clicks:1300,ctr:2.5,actions:A(9,48,20)}]}},
+    {id:'a4',name:'[Exemplo] Story chamada',status:'ACTIVE',effective_status:'ACTIVE',campaign:{name:'[Exemplo] Cadastro · Formulário instantâneo'},creative:{title:'Toque e cadastre-se'},insights:{data:[{spend:450,impressions:30000,inline_link_clicks:300,ctr:1.0,actions:A(0,9,2)}]}},
+    {id:'a5',name:'[Exemplo] Banner antigo',status:'ACTIVE',effective_status:'ACTIVE',campaign:{name:'[Exemplo] Remarketing 7 dias'},creative:{title:'Volte e aproveite'},insights:{data:[{spend:180,impressions:9000,inline_link_clicks:60,ctr:0.67,actions:A(0,0,0)}]}}];
+  DEMO.adsProblem=[{name:'[Exemplo] Story chamada v2',effective_status:'DISAPPROVED',campaign:{name:'[Exemplo] Cadastro · Formulário instantâneo'}}];
+  DEMO.bms=[{id:'9001',name:'Exemplo BM',verification_status:'verified',created_time:d(400).toISOString()}];
+  const h=n=>new Date(Date.now()-n*36e5).toISOString();
+  const cv=(id,who,wid,msgs)=>({id,updated_time:msgs[msgs.length-1][2],unread_count:msgs[msgs.length-1][0]?1:0,snippet:msgs[msgs.length-1][1],participants:{data:[{...who,id:wid},{name:'Exemplo Página',id:'5501'}]},_msgs:msgs.map(([inn,t,at],i)=>({id:id+'m'+i,message:t,created_time:at,from:{id:inn?wid:'5501'}}))});
+  DEMO.inbox={
+    messenger:[cv('c1',{name:'Carla Exemplo'},'u1',[[1,'Oi! Vi o anúncio da promoção, ainda está valendo?',h(5)],[0,'Oi, Carla! Está sim, até domingo.',h(4.8)],[1,'Qual o valor à vista?',h(0.4)]]),
+      cv('c2',{name:'Pedro Exemplo'},'u2',[[1,'Vocês entregam em Campinas?',h(30)],[0,'Entregamos sim! O frete sai grátis acima de R$ 200.',h(29)]]),
+      cv('c3',{name:'Lucas Exemplo'},'u3',[[1,'Bom dia, quero falar com um atendente',h(200)]])],
+    instagram:[cv('i1',{username:'bia.exemplo'},'g1',[[1,'Amei o story! Tem no tamanho M?',h(1)]]),
+      cv('i2',{username:'rafa.exemplo'},'g2',[[1,'Quanto custa o curso?',h(50)],[0,'Oi, Rafa! Te mandei os detalhes no WhatsApp.',h(49)]])]};
+  DEMO.waEvents=[
+    {em:h(3),tipo:'recebida',numero:'5511900000001',nome:'Maria Exemplo',texto:'Oi! Vi o anúncio, como funciona?',id:'w1'},
+    {em:h(2.9),tipo:'enviada pelo app',numero:'5511900000001',texto:'Oi, Maria! Te explico já.',id:'w2'},
+    {em:h(0.5),tipo:'recebida',numero:'5511900000001',nome:'Maria Exemplo',texto:'Legal, quero participar.',id:'w3'},
+    {em:h(40),tipo:'recebida',numero:'5511900000002',nome:'João Exemplo',texto:'Bom dia',id:'w4'}];
+  enterApp('Modo exemplo');
+}
+const DEMO={};
+
+/* ---------- Início ---------- */
+const EMBED_TOKEN=''; // token antigo removido: cole o novo na tela de conexão com "Lembrar neste navegador"
+(function(){if(location.protocol!=='https:')$('fbHint').innerHTML='O botão funciona quando o painel está publicado num endereço <b>https</b>. Aberto do computador, use o <b>token manual</b> abaixo.';
+  const fbt=fbReturn();if(fbt){$('tokenIn').value=fbt;$('rememberIn').checked=true;connect();return}
+  const t=store.get('cm_token')||EMBED_TOKEN;if(t){$('tokenIn').value=t;$('verIn').value=store.get('cm_ver')||'v26.0';connect()}})();
+</script>
+</body>
+</html>
