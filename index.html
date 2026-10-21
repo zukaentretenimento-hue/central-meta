@@ -309,7 +309,9 @@ const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},se
 /* ---------- API ---------- */
 function traduz(e){
   const m={190:'Sessão expirada. Clique em Sair e depois em Entrar com Facebook de novo.',200:'Falta permissão para essa ação. Gere o token de novo marcando todas as permissões da lista.',10:'Falta permissão para essa ação.',17:'Limite de chamadas da Meta atingido. Espere alguns minutos e atualize.',4:'Limite de chamadas atingido. Espere alguns minutos.',100:'Pedido inválido: '+(e.error_user_msg?(e.error_user_title?e.error_user_title+'. ':'')+e.error_user_msg:(e.message||'')),131047:'Passaram mais de 24 horas desde a última mensagem do cliente. Use um modelo aprovado.',551:'Esta pessoa não pode receber mensagens agora.'};
-  return (m[e.code]||e.message||'Erro desconhecido')+(e.code?` (código ${e.code})`:'');
+  /* Quando a Meta explica o motivo (ex.: conta proibida de anunciar, anunciante ausente), mostra a explicação dela */
+  const meta=e.error_user_msg&&![190,17,4].includes(e.code)?(e.error_user_title?e.error_user_title+'. ':'')+e.error_user_msg:'';
+  return (meta||m[e.code]||e.message||'Erro desconhecido')+(e.code?` (código ${e.code})`:'');
 }
 async function api(path,params={},method='GET',token){
   const u=new URL(`https://graph.facebook.com/${S.ver}/${path}`);
@@ -1106,11 +1108,15 @@ const copyCampaign=guard(async id=>{
   const nAds=pkg.adsets.reduce((a,s)=>a+s.ads.length,0);
   confirmBox('Campanha copiada',`<b>${esc(pkg.campaign.name)}</b>: ${pkg.adsets.length} conjunto(s) e ${nAds} anúncio(s). Para subir em outra BM, vá na aba <b>Nova campanha</b> e use "Colar campanha copiada". Também copiei para a área de transferência, se quiser colar em outro computador.`,'Escolher conta de destino',async()=>{document.querySelector('[data-t=create]').click();setTimeout(()=>{const c=$('pasteCard');if(c){c.scrollIntoView({behavior:'smooth',block:'start'});if(psPkg())psPrepare()}},900)});
 });
+/* Duplicar na mesma conta: usa o mesmo caminho do Copiar/Colar (a cópia automática da Meta
+   leva "aprimoramentos padrão" do criativo, que a Meta descontinuou e passou a recusar) */
 function dupHere(id,name){
-  confirmBox('Duplicar nesta conta?',`Cria uma cópia completa de <b>${esc(name)}</b> (conjuntos e anúncios) nesta mesma conta, pausada.`,'Duplicar',async()=>{
+  confirmBox('Duplicar nesta conta?',`Abre a cópia de <b>${esc(name)}</b> (conjuntos e anúncios) para você conferir e criar nesta mesma conta, pausada.`,'Abrir cópia',async()=>{
     if(S.demo)return toast('Exemplo: nada foi criado');
-    try{const r=await api(`${id}/copies`,{deep_copy:'true',status_option:'PAUSED',rename_options:JSON.stringify({rename_suffix:' (cópia)'})},'POST');toast('Cópia criada, pausada');delete S.cache['cp'+S.period];tCampaigns()}
-    catch(e){showErr('appErr',e.message+' Se a campanha for grande, use Copiar e depois Colar nesta mesma conta.')}
+    try{toast('Lendo a campanha…');const pkg=await buildPackage(id);const txt=JSON.stringify(pkg);store.set('cm_clip',txt);
+      document.querySelector('[data-t=create]').click();
+      setTimeout(()=>{if(!$('ps_json'))return;$('ps_json').value=txt;psSummary();$('ps_acc').value=S.acc.id;$('ps_name')&&($('ps_name').value=name+' (cópia)');psPrepare().then(()=>{const n=$('ps_name');if(n)n.value=name+' (cópia)'})},900)}
+    catch(e){showErr('appErr',e.message)}
   });
 }
 function psPkg(){try{const p=JSON.parse($('ps_json').value);return p&&p.v===1&&p.campaign?p:null}catch(e){return null}}
@@ -1123,6 +1129,7 @@ const psLoadAccounts=psGuard(async()=>{
   $('ps_acc').innerHTML=accs.map(a=>`<option value="${a.id}">${esc(a.name)} · ${a.account_id}${a.business?' · '+esc(a.business.name):''}</option>`).join('');
   toast(accs.length+' contas carregadas');
 });
+const J2=o=>JSON.stringify(o);
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
 function bestMatch(srcId,srcName,list){
   if(list.find(x=>x.id===srcId))return srcId;
@@ -1317,6 +1324,19 @@ const psPrepare=psGuard(async auto=>{
     const m=auds.find(a=>norm(a.name)===norm(name));
     rows.push(`<div class="field"><label for="psa_${id}">Público original: <b>${esc(name||id)}</b> ${tag(!!m)}</label><select id="psa_${id}"><option value="">Remover da cópia</option>${opt(auds,m?m.id:'')}</select></div>`);
   }
+  /* Anunciante e pagador verificados (Brasil): cada conta tem os seus. Busca os que a conta de destino já usa. */
+  const srcRri=(p.adsets.find(s=>s.regional_regulation_identities)||{}).regional_regulation_identities;
+  if(srcRri||p.adsets.some(s=>(s.regional_regulated_categories||[]).length)){
+    const used=await all(`${acc}/adsets`,{fields:'regional_regulation_identities'},200,tk).catch(()=>[]);
+    const pairs=[...new Map(used.filter(s=>s.regional_regulation_identities).map(s=>[J2(s.regional_regulation_identities),s.regional_regulation_identities])).values()];
+    const same=acc===p.source.acc;
+    const lbl=r=>r.universal_beneficiary===r.universal_payer?`Anunciante ${r.universal_beneficiary}`:`Beneficiário ${r.universal_beneficiary} · pagador ${r.universal_payer}`;
+    const opts=(same&&srcRri?[srcRri]:[]).concat(pairs.filter(r=>!(same&&srcRri&&J2(r)===J2(srcRri))));
+    rows.push(`<div class="field"><label for="ps_rri">Anunciante e pagador verificados (obrigatório no Brasil) ${opts.length?'<span class="pill p-good">Encontrado na conta de destino</span>':'<span class="pill p-warn">Confira</span>'}</label>
+      <select id="ps_rri">${opts.map(r=>`<option value="${esc(J2(r))}">${esc(lbl(r))}</option>`).join('')}<option value="">${opts.length?'Outro (informe o ID abaixo)':'Nenhum usado nesta conta ainda'}</option></select>
+      <input id="ps_rri_id" style="margin-top:6px" placeholder="ID do anunciante verificado (opcional)">
+      <div class="lead-sub">${opts.length?'Veio de um conjunto que já roda nesta conta.':'Esta conta ainda não tem anunciante verificado em nenhum conjunto. Crie um conjunto no Gerenciador e escolha "Anunciante e pagador" uma vez, ou cole o ID aqui. Sem ele, a Meta recusa o conjunto.'} O da conta de origem não serve em outra conta.</div></div>`);
+  }
   const waSrc=p.waNums||[];const nums=await psWaNumbers(acc,tk);
   if(waSrc.length||p.adsets.some(s=>/WHATSAPP/.test(s.destination_type||''))){
     for(const w of (waSrc.length?waSrc:[''])){
@@ -1436,7 +1456,9 @@ const psRun=psGuard(async()=>{
       if(s.dsa_beneficiary)ap.dsa_beneficiary=s.dsa_beneficiary;if(s.dsa_payor)ap.dsa_payor=s.dsa_payor;
       /* Anunciante e pagador verificados (exigido para anúncios no Brasil) */
       if(s.regional_regulated_categories&&s.regional_regulated_categories.length)ap.regional_regulated_categories=J(s.regional_regulated_categories);
-      if(s.regional_regulation_identities)ap.regional_regulation_identities=J(s.regional_regulation_identities);
+      {const sel=$('ps_rri'),id=($('ps_rri_id')&&$('ps_rri_id').value.replace(/\D/g,''))||'';
+       const rri=id?{universal_beneficiary:id,universal_payer:id}:sel&&sel.value?JSON.parse(sel.value):(sel?null:s.regional_regulation_identities);
+       if(rri)ap.regional_regulation_identities=J(rri);else if(ap.regional_regulated_categories)delete ap.regional_regulated_categories}
       const st=s.start_time&&new Date(s.start_time)>soon?new Date(s.start_time):soon;ap.start_time=st.toISOString();
       if(s.end_time){const en=new Date(s.end_time);if(en>st)ap.end_time=en.toISOString();else if(s.lifetime_budget&&!cbo){const d=new Date(st.getTime()+7*864e5);ap.end_time=d.toISOString();step(`"${s.name}": término já passou, coloquei 7 dias a partir do início. Ajuste se precisar.`,true)}}
       const as=(await api(`${acc}/adsets`,ap,'POST',tk)).id;step('Conjunto: '+s.name);nSets++;
@@ -1456,7 +1478,7 @@ const psRun=psGuard(async()=>{
         if(spec&&pg&&pg.instagram_business_account)spec.instagram_user_id=pg.instagram_business_account.id;
         if(spec)cp2.object_story_spec=J(spec);
         if(cr.asset_feed_spec)cp2.asset_feed_spec=J(swapIds(cr.asset_feed_spec,m));
-        if(cr.degrees_of_freedom_spec){const d=JSON.parse(J(cr.degrees_of_freedom_spec));if(d.creative_features_spec)delete d.creative_features_spec.standard_enhancements;cp2.degrees_of_freedom_spec=J(d)}
+        if(cr.degrees_of_freedom_spec){const d=JSON.parse(J(cr.degrees_of_freedom_spec));const fs=d.creative_features_spec;if(fs)Object.keys(fs).filter(k=>/^standard_enhancements/.test(k)).forEach(k=>delete fs[k]);cp2.degrees_of_freedom_spec=J(d)}
         if(cr.contextual_multi_ads)cp2.contextual_multi_ads=J(cr.contextual_multi_ads);
         if(cr.platform_customizations)cp2.platform_customizations=J(swapIds(cr.platform_customizations,m));
         if(cr.url_tags)cp2.url_tags=cr.url_tags;
@@ -1469,7 +1491,8 @@ const psRun=psGuard(async()=>{
             delete cp2.degrees_of_freedom_spec;delete cp2.contextual_multi_ads;
             crId=(await api(`${acc}/adcreatives`,cp2,'POST',tk)).id;step(`"${a.name}": melhorias automáticas do Advantage+ não foram aceitas na conta de destino. Ative de novo no Gerenciador se quiser.`,true)}
           const adp={name:a.name,adset_id:as,creative:J({creative_id:crId}),status:'PAUSED'};
-          if(a.tracking_specs)adp.tracking_specs=J(swapIds(a.tracking_specs,m));
+          /* Rastreamento: o original aponta para página, post e conversões antigos; só o pixel vai junto */
+          {const ts=(a.tracking_specs||[]).filter(x=>x.fb_pixel).map(x=>({...x,fb_pixel:x.fb_pixel.map(id=>m[String(id)]||id)}));if(ts.length)adp.tracking_specs=J(ts)}
           if(a.conversion_domain)adp.conversion_domain=a.conversion_domain;
           try{await api(`${acc}/ads`,adp,'POST',tk)}
           catch(e){if(!adp.tracking_specs)throw e;delete adp.tracking_specs;await api(`${acc}/ads`,adp,'POST',tk)}
@@ -1701,7 +1724,7 @@ async function waLimits(){
     const [lim,next]=WA_TIERS[n.messaging_limit_tier]||['—',''],q=WA_QUAL[n.quality_rating]||WA_QUAL.UNKNOWN;
     const ok=(w.tpls||[]).filter(t=>t.status==='APPROVED').length,pend=(w.tpls||[]).filter(t=>/PENDING|IN_APPEAL/.test(t.status)).length;
     html+=`<div class="wa-lim">
-      <div><div class="lead-sub">${esc(n.display_phone_number)} · ${esc(n.verified_name||w.name||'')}</div><div class="wa-big">${esc(lim)}</div><div class="lead-sub">${lim==='Ilimitado'?'contatos por dia':lim==='—'?'sem faixa: '+esc(n.status||'não conectado à API'):'pessoas diferentes a cada 24h'}</div></div>
+      <div><div class="lead-sub">${esc(n.display_phone_number)} · ${esc(n.verified_name||w.name||'')}</div><div class="wa-big">${esc(lim)}</div><div class="lead-sub">${lim==='Ilimitado'?'contatos por dia':lim==='—'?'sem faixa: '+({CONNECTED:'conectado',DISCONNECTED:'desconectado da API',PENDING:'pendente',FLAGGED:'sinalizado',RESTRICTED:'restrito',BANNED:'banido'}[n.status]||'não conectado à API'):'pessoas diferentes a cada 24h'}</div></div>
       <div><div class="lead-sub">Qualidade</div><span class="pill ${q[0]}">${q[1]}</span></div>
       <div><div class="lead-sub">Próxima faixa</div><b>${next?esc(next):'—'}</b></div>
       <div><div class="lead-sub">Modelos aprovados</div><b>${ok}</b>${pend?` <span class="lead-sub">(${pend} em análise)</span>`:''}</div></div>`;
