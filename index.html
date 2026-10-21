@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Central Meta Ads</title>
+<script>try{var th=localStorage.getItem('cm_theme');if(th=='light'||th=='dark')document.documentElement.dataset.theme=th}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -192,6 +193,29 @@ tr.blocked .dsl-in{border-color:var(--bad);color:var(--bad);text-decoration:line
 .ib-step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
 .ib-step:last-child{border-bottom:0}
 @media (max-width:760px){.ib{grid-template-columns:1fr}.ib-list{max-height:40vh}}
+
+/* ===== Acabamento: profundidade suave, transições e botão dia/noite ===== */
+body{background:radial-gradient(1200px 500px at 85% -120px,var(--accent-soft),transparent 70%) no-repeat,var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased}
+body,.card,.kpi,.bar,nav.tabs,button,select,input,textarea{transition:background-color .25s ease,border-color .25s ease,color .25s ease,box-shadow .25s ease}
+.card,.kpi{box-shadow:0 1px 2px rgba(15,34,51,.04),0 6px 20px rgba(15,34,51,.05)}
+.kpi:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(15,34,51,.06),0 10px 26px rgba(15,34,51,.08)}
+.kpi{transition:transform .2s ease,box-shadow .2s ease}
+button{border-radius:9px}
+button.primary{box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 35%,transparent)}
+select,input,textarea{border-radius:9px}
+select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:none}
+header.top{position:relative;overflow:hidden}
+header.top::after{content:"";position:absolute;right:-80px;top:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 35%,transparent),transparent 70%);pointer-events:none}
+header.top>*{position:relative;z-index:1}
+.top-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.theme-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--on-ink);padding:7px 12px;border-radius:99px;font-size:13px}
+.theme-btn:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35);color:var(--on-ink)}
+.theme-btn svg{width:16px;height:16px}
+[data-theme="dark"] .card,[data-theme="dark"] .kpi{box-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .kpi{box-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}}
+.wa-lim{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:end;padding:14px 16px;margin:4px 0 10px;background:var(--bg);border-radius:12px;border-left:4px solid var(--wa)}
+.wa-big{font:700 32px/1.1 var(--f-display);color:var(--wa)}
+@media (prefers-reduced-motion:reduce){.kpi:hover{transform:none}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -202,7 +226,7 @@ tr.blocked .dsl-in{border-color:var(--bad);color:var(--bad);text-decoration:line
       <h1>Central Meta Ads</h1>
       <div class="muted" style="font-size:13px">Campanhas, gastos, compras, pixels e leads das suas contas e BMs</div>
     </div>
-    <div class="who" id="who"></div>
+    <div class="top-right"><div class="who" id="who"></div><button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Alternar tema claro ou escuro"></button></div>
   </header>
 
   <!-- CONEXÃO -->
@@ -249,6 +273,7 @@ tr.blocked .dsl-in{border-color:var(--bad);color:var(--bad);text-decoration:line
       <a id="payTop" href="#" target="_blank" rel="noopener"><button class="primary" tabindex="-1">Pagar</button></a>
       <button onclick="loadTab(true)">Atualizar</button>
       <button onclick="lockMenu()" title="Pedir aprovação no celular no primeiro acesso do dia">🔒 Trava</button>
+      <button id="inviteBtn" hidden onclick="inviteMenu()" title="Gerar link para outra pessoa usar o painel">➕ Convidar</button>
       <button onclick="logout()">Sair</button>
     </div>
     <div id="demoFlag" class="demo-flag" hidden>Dados de exemplo. Nada aqui vem da sua conta. Conecte um token para ver os seus números.</div>
@@ -459,18 +484,56 @@ async function connect(){
     }catch(e){S.bmStruct=null}
     {const seen=new Set();S.accounts=S.accounts.filter(a=>a&&!seen.has(a.id)&&seen.add(a.id))}
     if($('rememberIn').checked){await saveToken(S.token);store.set('cm_ver',S.ver)}
-    enterApp(me.name);
+    S.meId=me.id;enterApp(me.name);
   }catch(e){showErr('connectErr',e.message)}
 }
 function enterApp(name){
   $('connectView').hidden=true;$('appView').hidden=false;$('demoFlag').hidden=!S.demo;
   $('who').innerHTML=`<span class="pill p-good">Conectado</span><span>${esc(name)}</span>`;
+  $('inviteBtn').hidden=S.demo||S.meId!==OWNER_ID;
   const opt=a=>`<option value="${a.id}">${isBlocked(a)?'⛔ ':''}${esc(a.name)} · ${a.account_id}${isBlocked(a)?' · BLOQUEADA':''}</option>`;
   if(!S.accounts.length)$('accSel').innerHTML='<option>Nenhuma conta encontrada</option>';
   else{const groups=bmGroups();$('accSel').innerHTML=groups.map(g=>`<optgroup label="${esc(g.name)} (${g.acc.length})">${g.acc.map(opt).join('')}</optgroup>`).join('')}
   const last=store.get('cm_acc')||'act_'+DEFAULT_ACC;selectAccount(S.accounts.find(a=>a.id===last)?last:(S.accounts[0]||{}).id);
 }
 function selectAccount(id){S.acc=S.accounts.find(a=>a.id===id)||null;if(S.acc&&$('payTop'))$('payTop').href=payUrl(S.acc);if(S.acc){store.set('cm_acc',id);$('accSel').value=id}S.cache={};loadTab()}
+/* Tema dia/noite: segue o sistema até a pessoa escolher; a escolha fica salva neste navegador */
+const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+const isDark=()=>{const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches};
+function paintThemeBtn(){const b=$('themeBtn');if(b)b.innerHTML=isDark()?SUN+'<span>Dia</span>':MOON+'<span>Noite</span>'}
+function toggleTheme(){const t=isDark()?'light':'dark';document.documentElement.dataset.theme=t;store.set('cm_theme',t);paintThemeBtn()}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',paintThemeBtn);paintThemeBtn();
+/* Convite: só a conta dona do painel vê o botão. Gera o link do painel com o nome de quem convidou
+   e leva ao Business Suite, onde a pessoa ganha acesso ao app (necessário até a Análise do app ser aprovada). */
+const OWNER_ID='122121084909480744',PANEL_URL='https://zukaentretenimento-hue.github.io/central-meta/';
+const APP_PEOPLE_URL='https://business.facebook.com/settings/apps/4332887070336858/?business_id=1423193659163779';
+function inviteMenu(){
+  const who=($('who').textContent||'').replace('Conectado','').trim();
+  $('modalRoot').innerHTML=`<div class="modal" role="dialog" aria-modal="true"><div class="box" style="max-width:520px">
+    <h2>Convidar para o painel</h2>
+    <div class="field" style="margin-top:12px"><label for="iv_nome">Nome de quem você vai convidar</label><input id="iv_nome" placeholder="Ex.: Maria" oninput="inviteUpd()"></div>
+    <div class="field" style="margin-top:12px"><label>1. Dê acesso ao app</label>
+      <div class="lead-sub">No Business Suite, clique em <b>Adicionar pessoas</b>, informe o e-mail da pessoa e marque acesso ao app <b>Gestao de Trafego Pro</b>. A Meta manda o convite por e-mail.</div>
+      <div class="actions" style="margin-top:6px"><a href="${APP_PEOPLE_URL}" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Abrir pessoas do app</button></a></div></div>
+    <div class="field" style="margin-top:12px"><label>2. Mande o link do painel</label><div class="perm" id="iv_link"></div>
+      <div class="actions" style="margin-top:6px"><button class="sm" onclick="copyText($('iv_msg').value)">Copiar mensagem</button><a id="iv_wa" target="_blank" rel="noopener"><button class="sm wa" tabindex="-1">Enviar no WhatsApp</button></a></div>
+      <textarea id="iv_msg" style="margin-top:8px;min-height:110px"></textarea></div>
+    <div class="note">Depois de aceitar o convite do e-mail, a pessoa abre o link e clica em <b>Entrar com Facebook</b>. Ela só vê as BMs e contas a que tem acesso. Quando a Análise do app for aprovada, o passo 1 deixa de ser necessário.</div>
+    <div class="actions"><button onclick="closeModal()">Fechar</button></div></div></div>`;
+  $('iv_nome').dataset.de=who;inviteUpd();
+}
+function inviteUpd(){
+  const n=$('iv_nome').value.trim(),de=$('iv_nome').dataset.de||'';
+  const link=PANEL_URL+'?convite='+encodeURIComponent(de);
+  $('iv_link').textContent=link;
+  const msg=`Olá${n?' '+n:''}! ${de||'Eu'} te convidou para usar o Central Meta Ads, o painel das nossas campanhas, leads e WhatsApp.
+
+1. Aceite o convite da Meta que chegou no seu e-mail.
+2. Abra o link e clique em "Entrar com Facebook":
+${link}`;
+  $('iv_msg').value=msg;$('iv_wa').href='https://wa.me/?text='+encodeURIComponent(msg);
+}
 function logout(){store.del('cm_token');store.del('cm_tok_enc');S.token='';S.demo=false;S.cache={};S.pages=null;S.bms=null;$('appView').hidden=true;$('connectView').hidden=false;$('who').innerHTML='';$('tokenIn').value=''}
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.tab=b.dataset.t;loadTab()});
 
@@ -1541,7 +1604,8 @@ function waLog(t,bad){const el=$('wa_log');if(!el)return;el.insertAdjacentHTML('
 const tWa=guard(async()=>{
   const c=waCfg(),pages=await getPages().catch(()=>[]);
   $('tabBody').innerHTML=`
-  <div class="card" style="margin-top:0"><div class="card-h"><h2>WhatsApp Business do celular</h2><span class="pill p-good">Em uso</span></div>
+  <div class="card" style="margin-top:0" id="wa_lim"><div class="card-h"><h2>Limite de disparo</h2></div><p class="muted" style="margin:0">Consultando a Meta…</p></div>
+  <div class="card"><div class="card-h"><h2>WhatsApp Business do celular</h2><span class="pill p-good">Em uso</span></div>
     <p class="muted" style="font-size:14px;margin:0 0 12px">Seu número fica só no app. O lead toca no botão do formulário, manda a primeira mensagem e a saudação automática do app responde na hora.</p>
     <div class="actions" style="margin-bottom:14px">
       <a href="https://web.whatsapp.com/" target="_blank" rel="noopener"><button class="sm" tabindex="-1">Abrir WhatsApp Web</button></a>
@@ -1603,8 +1667,56 @@ const tWa=guard(async()=>{
     <div id="wa_log"><div class="lead-sub">${Object.keys(waSent()).length} mensagens enviadas até agora por este navegador.</div></div>
   </div>
   </details>`;
-  wbUpd();waPreview();if(pages.length)waForms();
+  wbUpd();waPreview();if(pages.length)waForms();waLimits();
 });
+/* Limite de disparo: faixa, qualidade e o que falta para a Meta subir o limite */
+const WA_TIERS={TIER_50:['50','250'],TIER_250:['250','1.000'],TIER_1K:['1.000','10.000'],TIER_2K:['2.000','10.000'],TIER_10K:['10.000','100.000'],TIER_100K:['100.000','ilimitado'],TIER_UNLIMITED:['Ilimitado','']};
+const WA_VER={verified:'Verificada',pending:'Em análise',pending_submission:'Não enviada',pending_need_more_info:'Pede mais informações',failed:'Reprovada',rejected:'Reprovada',not_verified:'Não verificada'};
+const WA_NAME={APPROVED:'Aprovado',AVAILABLE_WITHOUT_REVIEW:'Liberado sem análise',PENDING_REVIEW:'Em análise',DECLINED:'Recusado',EXPIRED:'Vencido',NONE:'Não enviado'};
+const WA_QUAL={GREEN:['p-good','Verde (boa)'],YELLOW:['p-warn','Amarela (atenção)'],RED:['p-bad','Vermelha (risco de cair o limite)'],UNKNOWN:['p-mut','Ainda sem nota']};
+async function waLimits(){
+  const box=$('wa_lim');if(!box)return;
+  let wabas=[];
+  try{
+    if(S.demo)wabas=[{name:'Exemplo',business_verification_status:'pending',tpls:[{status:'PENDING'}],nums:[{display_phone_number:'+55 11 99999-0000',verified_name:'Sua empresa',messaging_limit_tier:'TIER_250',quality_rating:'GREEN',name_status:'AVAILABLE_WITHOUT_REVIEW',status:'CONNECTED',throughput:{level:'STANDARD'}}]}];
+    else{
+      const c=waCfg();let list=c.waba?[{id:c.waba}]:[];
+      if(!list.length)for(const b of await getBms()){const w=await all(`${b.id}/owned_whatsapp_business_accounts`,{fields:'id'},50).catch(()=>[]);list.push(...w)}
+      for(const w of list){
+        const [info,nums,tpls]=await Promise.all([api(w.id,{fields:'name,business_verification_status,account_review_status'}).catch(()=>({id:w.id})),
+          all(`${w.id}/phone_numbers`,{fields:'display_phone_number,verified_name,messaging_limit_tier,quality_rating,name_status,status,throughput'},50).catch(()=>[]),
+          all(`${w.id}/message_templates`,{fields:'name,status'},200).catch(()=>[])]);
+        wabas.push({...info,nums,tpls});
+      }
+    }
+  }catch(e){box.innerHTML=`<div class="card-h"><h2>Limite de disparo</h2></div><p style="color:var(--bad);margin:0">${esc(e.message)}</p>`;return}
+  if(!wabas.length){box.innerHTML='<div class="card-h"><h2>Limite de disparo</h2></div><p class="muted" style="margin:0">Nenhuma conta do WhatsApp Business encontrada nas suas BMs.</p>';return}
+  const pill={ok:'<span class="pill p-good">Pronto</span>',no:'<span class="pill p-warn">Falta</span>',chk:'<span class="pill p-mut">Dica</span>'};
+  const step=(st,t,d)=>`<div class="ib-step">${pill[st]}<div style="min-width:0"><b>${t}</b><div class="lead-sub">${d}</div></div></div>`;
+  const a=(u,t)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+  let html='<div class="card-h"><h2>Limite de disparo</h2><button class="sm" onclick="waLimits()">Atualizar</button></div>';
+  if(!wabas.some(w=>w.nums.length)){box.innerHTML=html+'<p class="muted" style="margin:0">Não consegui ler os números do WhatsApp. Confira se o login tem as permissões whatsapp_business_management e whatsapp_business_messaging.</p>';return}
+  const rows=wabas.flatMap(w=>w.nums.map(n=>({w,n}))),main=rows.find(r=>WA_TIERS[r.n.messaging_limit_tier])||rows[0];
+  for(const {w,n} of rows){
+    const [lim,next]=WA_TIERS[n.messaging_limit_tier]||['—',''],q=WA_QUAL[n.quality_rating]||WA_QUAL.UNKNOWN;
+    const ok=(w.tpls||[]).filter(t=>t.status==='APPROVED').length,pend=(w.tpls||[]).filter(t=>/PENDING|IN_APPEAL/.test(t.status)).length;
+    html+=`<div class="wa-lim">
+      <div><div class="lead-sub">${esc(n.display_phone_number)} · ${esc(n.verified_name||w.name||'')}</div><div class="wa-big">${esc(lim)}</div><div class="lead-sub">${lim==='Ilimitado'?'contatos por dia':lim==='—'?'sem faixa: '+esc(n.status||'não conectado à API'):'pessoas diferentes a cada 24h'}</div></div>
+      <div><div class="lead-sub">Qualidade</div><span class="pill ${q[0]}">${q[1]}</span></div>
+      <div><div class="lead-sub">Próxima faixa</div><b>${next?esc(next):'—'}</b></div>
+      <div><div class="lead-sub">Modelos aprovados</div><b>${ok}</b>${pend?` <span class="lead-sub">(${pend} em análise)</span>`:''}</div></div>`;
+  }
+  const {w,n}=main,lim=(WA_TIERS[n.messaging_limit_tier]||['—'])[0],verified=w.business_verification_status==='verified',ok=(w.tpls||[]).filter(t=>t.status==='APPROVED').length;
+  html+=`<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 6px">Como aumentar o limite de ${esc(n.display_phone_number)}</h3>`+[
+    step(verified?'ok':'no','Verificação da empresa',verified?'Empresa verificada pela Meta.':`Status: <b>${esc(WA_VER[w.business_verification_status]||w.business_verification_status||'Não enviada')}</b>. É o que libera a faixa de 1.000. Confira em ${a('https://business.facebook.com/settings/security','Central de Segurança da BM')} (a BM dona do WhatsApp).`),
+    step(ok?'ok':'no','Modelo de mensagem aprovado',ok?`${ok} modelo(s) aprovado(s).`:'Sem modelo aprovado não dá para iniciar conversa. Acompanhe em "Envio pela API oficial" → passo 2 → Ver status do modelo.'),
+    step(n.quality_rating==='GREEN'?'ok':'no','Manter a qualidade Verde','Se muitas pessoas bloquearem ou denunciarem, a qualidade cai e o limite pode diminuir. Mande só para quem se cadastrou ou pediu contato.'),
+    step(/APPROVED|AVAILABLE_WITHOUT_REVIEW/.test(n.name_status||'')?'ok':'no','Nome de exibição aprovado',`Status do nome: <b>${esc(WA_NAME[n.name_status]||n.name_status||'—')}</b>.`),
+    step('chk','Usar o limite com regularidade',`A Meta sobe a faixa sozinha quando você usa pelo menos metade do limite atual (${esc(lim)}) por alguns dias seguidos e mantém a qualidade. Cada subida leva de algumas horas a alguns dias.`),
+    step('chk','Boas práticas de disparo','Personalize com o nome, deixe claro quem é a empresa, ofereça "responda SAIR para não receber mais", use a categoria certa (Utilidade para avisos, Marketing para ofertas) e espalhe os envios ao longo do dia em vez de tudo de uma vez.'),
+    step('chk','Responder grátis por 24h','Quando o cliente escreve primeiro, você responde à vontade por 24h e isso não conta no limite. Botões "Falar no WhatsApp" nos anúncios ajudam a gerar essas conversas.')].join('');
+  box.innerHTML=html;
+}
 function wbUpd(){const n=($('wb_num').value||'').replace(/\D/g,''),t=$('wb_txt').value;store.set('cm_wb_num',n);store.set('cm_wb_txt',t);const l=`https://wa.me/${n}?text=${encodeURIComponent(t)}`;$('wb_link').textContent=l;$('wb_test').href=l}
 function waPreview(){const c=waSave();$('wa_prev').innerHTML=esc(fillMarca(c.body,c).replace('{{1}}','Maria'))+`<div style="font-size:12px;color:var(--muted);margin-top:8px">${esc(fillMarca(c.footer,c))}</div>`}
 const waFind=guard(async()=>{
@@ -1966,7 +2078,8 @@ const DEMO={};
 
 /* ---------- Início ---------- */
 const EMBED_TOKEN=''; // token antigo removido: cole o novo na tela de conexão com "Lembrar neste navegador"
-(function(){if(location.protocol!=='https:')$('fbHint').innerHTML='O botão funciona quando o painel está publicado num endereço <b>https</b>. Aberto do computador, use o <b>token manual</b> abaixo.';
+(function(){const cv=new URLSearchParams(location.search).get('convite');if(cv!==null)$('fbHint').insertAdjacentHTML('beforebegin',`<div class="note" style="margin:0 0 10px">👋 ${cv?'<b>'+esc(cv)+'</b> te convidou':'Você foi convidado'} para usar o Central Meta Ads. Aceite o convite da Meta que chegou no seu e-mail e clique em <b>Entrar com Facebook</b>.</div>`);
+  if(location.protocol!=='https:')$('fbHint').innerHTML='O botão funciona quando o painel está publicado num endereço <b>https</b>. Aberto do computador, use o <b>token manual</b> abaixo.';
   const fbt=fbReturn();
   /* Trava ligada e ainda não aprovada hoje: nada abre antes do celular aprovar */
   if(lockOn()&&!dayKey()){lockGate(fbt?()=>fbExtend(fbt).then(t=>{$('tokenIn').value=t;$('rememberIn').checked=true;connect()}):null);return}
