@@ -193,6 +193,7 @@ tr.blocked .dsl-in{border-color:var(--bad);color:var(--bad);text-decoration:line
 .ib-step:last-child{border-bottom:0}
 @media (max-width:760px){.ib{grid-template-columns:1fr}.ib-list{max-height:40vh}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -247,6 +248,7 @@ tr.blocked .dsl-in{border-color:var(--bad);color:var(--bad);text-decoration:line
         </select></div>
       <a id="payTop" href="#" target="_blank" rel="noopener"><button class="primary" tabindex="-1">Pagar</button></a>
       <button onclick="loadTab(true)">Atualizar</button>
+      <button onclick="lockMenu()" title="Pedir aprovação no celular no primeiro acesso do dia">🔒 Trava</button>
       <button onclick="logout()">Sair</button>
     </div>
     <div id="demoFlag" class="demo-flag" hidden>Dados de exemplo. Nada aqui vem da sua conta. Conecte um token para ver os seus números.</div>
@@ -359,6 +361,87 @@ function fbReturn(){
   return h.get('access_token');
 }
 
+/* ---------- Trava do celular ----------
+   O token fica salvo cifrado (AES-GCM). A chave que abre o token só vem do servidor depois que o
+   celular pareado aprova o QR do dia. O celular guarda um segredo que este navegador nunca vê. */
+const LOCK_SRV=()=>TOKEN_SWAP_URL;
+const APROVAR_URL='https://zukaentretenimento-hue.github.io/central-meta/aprovar.html';
+const LK={timer:null};
+const today=()=>new Date().toLocaleDateString('sv-SE');
+const lockOn=()=>!!store.get('cm_lock');
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function lockCall(o){const r=await fetch(LOCK_SRV(),{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(o),redirect:'follow'});const j=await r.json();if(j.erro)throw new Error(j.erro);return j}
+async function aesKey(k){return crypto.subtle.importKey('raw',unb64(k),'AES-GCM',false,['encrypt','decrypt'])}
+async function encTok(k,t){const iv=crypto.getRandomValues(new Uint8Array(12));const c=await crypto.subtle.encrypt({name:'AES-GCM',iv},await aesKey(k),new TextEncoder().encode(t));return b64(iv)+'.'+b64(c)}
+async function decTok(k,s){const [iv,c]=s.split('.');return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(iv)},await aesKey(k),unb64(c)))}
+const dayKey=()=>store.get('cm_lk_day')===today()?store.get('cm_lk_key'):null;
+/* Grava o token: com a trava ligada, só a versão cifrada fica no navegador */
+async function saveToken(t){
+  if(lockOn()){const k=dayKey();if(k){store.set('cm_tok_enc',await encTok(k,t));store.del('cm_token')}}
+  else store.set('cm_token',t);
+}
+function qrInto(el,url){el.innerHTML='';if(window.QRCode)new QRCode(el,{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});else el.innerHTML=`<a href="${esc(url)}">${esc(url)}</a>`}
+function lockScreen(html){let o=$('lockView');if(!o){o=document.createElement('div');o.id='lockView';o.style.cssText='position:fixed;inset:0;z-index:9000;background:var(--bg,#0d1520);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto';document.body.appendChild(o)}o.innerHTML=`<div class="card" style="max-width:420px;width:100%;text-align:center;margin:0">${html}</div>`}
+function lockClose(){clearInterval(LK.timer);const o=$('lockView');if(o)o.remove()}
+/* Tela do dia: QR → celular aprova → recebe a chave → abre o token */
+async function lockGate(after){
+  $('connectView').hidden=true;$('appView').hidden=true;
+  lockScreen('<h2 style="margin-top:0">🔐 Painel travado</h2><p class="muted">Gerando o QR code…</p>');
+  let sid;
+  try{sid=(await lockCall({acao:'sessao',lock:store.get('cm_lock')})).sid}
+  catch(e){lockScreen(`<h2 style="margin-top:0">🔐 Painel travado</h2><p style="color:var(--bad)">${esc(e.message)}</p><div class="actions" style="justify-content:center;margin-top:12px"><button class="primary" onclick="lockGate()">Tentar de novo</button></div>${lostBtn()}`);return}
+  lockScreen(`<h2 style="margin-top:0">🔐 Primeiro acesso do dia</h2>
+    <p class="muted">Escaneie com a câmera do <b>celular pareado</b> e toque em <b>Aprovar acesso</b>.</p>
+    <div id="lkQr" style="display:flex;justify-content:center;margin:16px 0;background:#fff;padding:12px;border-radius:12px;width:max-content;margin-inline:auto"></div>
+    <p class="lead-sub" id="lkMsg">Aguardando o celular…</p>${lostBtn()}`);
+  qrInto($('lkQr'),`${APROVAR_URL}#ap=${store.get('cm_lock')}.${sid}`);
+  clearInterval(LK.timer);let n=0;
+  LK.timer=setInterval(async()=>{
+    if(++n>200){clearInterval(LK.timer);$('lkMsg').innerHTML='QR vencido. <a href="#" onclick="lockGate();return false">Gerar outro</a>';return}
+    try{const j=await lockCall({acao:'status',lock:store.get('cm_lock'),sid});
+      if(j.ok){clearInterval(LK.timer);store.set('cm_lk_key',j.key);store.set('cm_lk_day',today());lockClose();lockOpen(after)}}catch(e){}
+  },3000);
+}
+async function lockOpen(after){
+  const k=dayKey(),enc=store.get('cm_tok_enc');
+  $('connectView').hidden=false;
+  if(after)return after();
+  if(k&&enc){try{$('tokenIn').value=await decTok(k,enc);$('rememberIn').checked=true;connect();return}catch(e){showErr('connectErr','Não consegui abrir o token salvo. Entre com Facebook de novo.')}}
+}
+const lostBtn=()=>`<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:12px"><a href="#" class="lead-sub" onclick="lockLost();return false">Perdi o celular pareado</a></div>`;
+function lockLost(){
+  confirmBox('Perdeu o celular?','Isso apaga a trava e o token salvo <b>neste navegador</b>. Depois você entra com o Facebook de novo (com a sua senha) e pode ativar a trava em outro celular.','Apagar e entrar de novo',()=>{
+    ['cm_lock','cm_tok_enc','cm_lk_key','cm_lk_day','cm_token'].forEach(k=>store.del(k));lockClose();$('appView').hidden=true;$('connectView').hidden=false;
+  },true);
+}
+/* Botão "Trava do celular" no topo do painel */
+async function lockMenu(){
+  if(S.demo)return toast('Exemplo: conecte sua conta para usar a trava');
+  if(!(window.crypto&&crypto.subtle))return showErr('appErr','A trava precisa do painel aberto pelo endereço https (site publicado).');
+  if(lockOn()){
+    confirmBox('Trava do celular ativa','Todo dia, no primeiro acesso, o painel pede aprovação no celular pareado. Desativar volta a guardar o token sem trava neste navegador.','Desativar trava',async()=>{
+      ['cm_lock','cm_tok_enc','cm_lk_key','cm_lk_day'].forEach(k=>store.del(k));store.set('cm_token',S.token);toast('Trava desativada')},true);
+    return;
+  }
+  let j;try{j=await lockCall({acao:'novaTrava'})}catch(e){return showErr('appErr','Trava: '+e.message)}
+  store.set('cm_lock',j.lock);store.set('cm_lk_key',j.key);store.set('cm_lk_day',today());
+  await saveToken(S.token);
+  lockScreen(`<h2 style="margin-top:0">📱 Parear o celular</h2>
+    <p class="muted">Escaneie com a câmera do celular e toque em <b>Parear este celular</b>. Use o navegador normal do celular (não anônimo).</p>
+    <div id="lkQr" style="display:flex;justify-content:center;margin:16px 0;background:#fff;padding:12px;border-radius:12px;width:max-content;margin-inline:auto"></div>
+    <p class="lead-sub" id="lkMsg">Aguardando o celular… (o QR vale 15 minutos)</p>
+    <div class="actions" style="justify-content:center;margin-top:10px"><button onclick="lockCancel()">Cancelar</button></div>`);
+  qrInto($('lkQr'),`${APROVAR_URL}#parear=${j.lock}.${j.pair}`);
+  clearInterval(LK.timer);let n=0;
+  LK.timer=setInterval(async()=>{
+    if(++n>300){lockCancel();return}
+    try{const r=await lockCall({acao:'pareado',lock:j.lock});if(r.ok){clearInterval(LK.timer);
+      lockScreen(`<h2 style="margin-top:0">✅ Trava ativada</h2><p class="muted">A partir de amanhã, o primeiro acesso do dia pede aprovação neste celular. O token agora fica guardado com cadeado neste navegador.</p><div class="actions" style="justify-content:center;margin-top:12px"><button class="primary" onclick="lockClose()">Fechar</button></div>`)}}catch(e){}
+  },3000);
+}
+function lockCancel(){['cm_lock','cm_tok_enc','cm_lk_key','cm_lk_day'].forEach(k=>store.del(k));store.set('cm_token',S.token);lockClose();toast('Trava não ativada')}
+
 /* ---------- Conexão ---------- */
 async function connect(){
   S.token=$('tokenIn').value.trim(); S.ver=$('verIn').value.trim()||'v26.0'; S.demo=false;
@@ -375,7 +458,7 @@ async function connect(){
       for(const id of miss){try{S.accounts.push(await api(id,{fields:AF+',is_prepay_account,funding_source_details'}))}catch(e){}}
     }catch(e){S.bmStruct=null}
     {const seen=new Set();S.accounts=S.accounts.filter(a=>a&&!seen.has(a.id)&&seen.add(a.id))}
-    if($('rememberIn').checked){store.set('cm_token',S.token);store.set('cm_ver',S.ver)}
+    if($('rememberIn').checked){await saveToken(S.token);store.set('cm_ver',S.ver)}
     enterApp(me.name);
   }catch(e){showErr('connectErr',e.message)}
 }
@@ -388,7 +471,7 @@ function enterApp(name){
   const last=store.get('cm_acc')||'act_'+DEFAULT_ACC;selectAccount(S.accounts.find(a=>a.id===last)?last:(S.accounts[0]||{}).id);
 }
 function selectAccount(id){S.acc=S.accounts.find(a=>a.id===id)||null;if(S.acc&&$('payTop'))$('payTop').href=payUrl(S.acc);if(S.acc){store.set('cm_acc',id);$('accSel').value=id}S.cache={};loadTab()}
-function logout(){store.del('cm_token');S.token='';S.demo=false;S.cache={};S.pages=null;S.bms=null;$('appView').hidden=true;$('connectView').hidden=false;$('who').innerHTML='';$('tokenIn').value=''}
+function logout(){store.del('cm_token');store.del('cm_tok_enc');S.token='';S.demo=false;S.cache={};S.pages=null;S.bms=null;$('appView').hidden=true;$('connectView').hidden=false;$('who').innerHTML='';$('tokenIn').value=''}
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.tab=b.dataset.t;loadTab()});
 
 async function loadTab(force){
@@ -1884,7 +1967,11 @@ const DEMO={};
 /* ---------- Início ---------- */
 const EMBED_TOKEN=''; // token antigo removido: cole o novo na tela de conexão com "Lembrar neste navegador"
 (function(){if(location.protocol!=='https:')$('fbHint').innerHTML='O botão funciona quando o painel está publicado num endereço <b>https</b>. Aberto do computador, use o <b>token manual</b> abaixo.';
-  const fbt=fbReturn();if(fbt){$('rememberIn').checked=true;showErr('connectErr','');fbExtend(fbt).then(t=>{$('tokenIn').value=t;connect()});return}
+  const fbt=fbReturn();
+  /* Trava ligada e ainda não aprovada hoje: nada abre antes do celular aprovar */
+  if(lockOn()&&!dayKey()){lockGate(fbt?()=>fbExtend(fbt).then(t=>{$('tokenIn').value=t;$('rememberIn').checked=true;connect()}):null);return}
+  if(lockOn()&&!fbt){lockOpen();return}
+  if(fbt){$('rememberIn').checked=true;showErr('connectErr','');fbExtend(fbt).then(t=>{$('tokenIn').value=t;connect()});return}
   const t=store.get('cm_token')||EMBED_TOKEN;if(t){$('tokenIn').value=t;$('verIn').value=store.get('cm_ver')||'v26.0';connect()}})();
 </script>
 </body>
