@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aprovar acesso</title>
+<style>
+  :root{--bg:#0d1520;--card:#15202e;--txt:#e8eef5;--muted:#93a4b8;--ok:#2fbf71;--bad:#ff6b5e;--acc:#2ec4d6}
+  @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f3f6fa;--card:#fff;--txt:#14202e;--muted:#5b6b7e}}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--txt);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px}
+  .card{background:var(--card);border-radius:16px;padding:28px 22px;max-width:380px;width:100%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  h1{font-size:20px;margin:0 0 8px}
+  p{color:var(--muted);margin:8px 0 0}
+  .big{font-size:52px;line-height:1;margin-bottom:12px}
+  button{margin-top:22px;width:100%;padding:16px;border:0;border-radius:12px;font-size:18px;font-weight:700;background:var(--ok);color:#fff;cursor:pointer}
+  button.sec{background:transparent;color:var(--muted);border:1px solid var(--muted);font-size:15px;padding:12px;margin-top:10px}
+  .bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="card" id="box"><div class="big">⏳</div><h1>Carregando…</h1></div>
+<script>
+/* Página do celular da trava do painel Central Meta Ads.
+   #parear=<trava>.<código>  → pareia este celular (o segredo é criado aqui e nunca sai para o painel)
+   #ap=<trava>.<sessão>      → aprova o acesso do dia */
+const SRV='https://script.google.com/macros/s/AKfycbwPyJ9h3z-WJnumXG1lKzLVl9MyNfeBzXnn-06wfUGzIjiUwMDqiovFmXDvleAv0HHa1A/exec';
+const box=document.getElementById('box');
+const show=(icon,title,text,extra='')=>{box.innerHTML=`<div class="big">${icon}</div><h1>${title}</h1>${text?`<p>${text}</p>`:''}${extra}`};
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}}};
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function call(o){const r=await fetch(SRV,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(o),redirect:'follow'});return r.json()}
+async function hmac(key,msg){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(key),{name:'HMAC',hash:'SHA-256'},false,['sign']);return hex(await crypto.subtle.sign('HMAC',k,new TextEncoder().encode(msg)))}
+
+async function parear(lock,pair){
+  if(ls.get('trava_'+lock))return show('✅','Este celular já está pareado','Pode fechar esta página.');
+  show('📱','Parear este celular?','Depois disso, o painel só abre (uma vez por dia) quando você aprovar por aqui.',
+    '<button id="go">Parear este celular</button>');
+  document.getElementById('go').onclick=async()=>{
+    show('⏳','Pareando…','');
+    const secret=hex(crypto.getRandomValues(new Uint8Array(32)));
+    if(!ls.set('trava_'+lock,secret))return show('⚠️','Não consegui salvar','Abra esta página no navegador normal do celular (Chrome ou Safari), sem aba anônima.');
+    try{const j=await call({acao:'parear',lock,pair,secret});
+      if(j.ok)show('✅','Celular pareado!','Volte ao computador: o painel já vai mostrar a trava ativada. Não apague os dados do navegador deste celular.');
+      else{localStorage.removeItem('trava_'+lock);show('❌','Não pareou',`<span class="bad">${j.erro||'Erro'}</span>`)}
+    }catch(e){localStorage.removeItem('trava_'+lock);show('❌','Sem conexão','Tente de novo.')}
+  };
+}
+async function aprovar(lock,sid){
+  const secret=ls.get('trava_'+lock);
+  if(!secret)return show('🚫','Celular não pareado','Este não é o celular pareado com o painel. Use o celular em que você ativou a trava (no mesmo navegador).');
+  show('🔐','Liberar o painel?','Alguém está abrindo o Central Meta Ads agora. Aprove só se for você.',
+    '<button id="ok">Aprovar acesso</button><button class="sec" id="no">Não fui eu</button>');
+  document.getElementById('no').onclick=()=>show('🛑','Acesso não liberado','O painel continua travado. Se não foi você, troque a senha do Facebook.');
+  document.getElementById('ok').onclick=async()=>{
+    show('⏳','Aprovando…','');
+    try{const j=await call({acao:'aprovar',lock,sid,sig:await hmac(secret,sid)});
+      j.ok?show('✅','Acesso liberado','O painel abre sozinho no computador em alguns segundos.'):show('❌','Não aprovado',`<span class="bad">${j.erro||'Erro'}</span>`);
+    }catch(e){show('❌','Sem conexão','Tente de novo.')}
+  };
+}
+const h=new URLSearchParams(location.hash.slice(1));
+const [a,b]=String(h.get('parear')||h.get('ap')||'').split('.');
+if(!/^[a-f0-9]{32}$/.test(a||'')||!/^[a-f0-9]{32}$/.test(b||''))show('❓','QR inválido','Escaneie o QR code que aparece no painel.');
+else if(h.get('parear'))parear(a,b);else aprovar(a,b);
+</script>
+</body>
+</html>
