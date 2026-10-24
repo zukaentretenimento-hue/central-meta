@@ -710,10 +710,12 @@ const tOverview=guard(async()=>{
 
 /* ---------- Campanhas ---------- */
 const tCampaigns=guard(async()=>{
-  const list=await getCampaigns();
+  const all0=await getCampaigns(),f=store.get('cm_cpf')||'all';
+  /* Filtro: todas, só ativas (veiculando) ou só desativadas */
+  const list=all0.filter(c=>f==='all'||(f==='on'?c.status==='ACTIVE':c.status!=='ACTIVE'));
   const rows=list.map(c=>{const i=(c.insights&&c.insights.data&&c.insights.data[0])||{};const sp=Number(i.spend||0),b=act(i.actions,PURCHASE),v=act(i.action_values,PURCHASE),l=act(i.actions,LEAD);return{c,i,sp,b,v,l}}).sort((x,y)=>y.sp-x.sp);
   const budget=c=>c.daily_budget?money(c.daily_budget/100)+'/dia':c.lifetime_budget?money(c.lifetime_budget/100)+' total':'No conjunto';
-  $('tabBody').innerHTML=`<div class="card"><div class="card-h"><h2>${list.length} campanhas</h2><span class="muted" style="font-size:13px">Ordenadas por gasto no período</span></div>
+  $('tabBody').innerHTML=`<div class="card"><div class="card-h"><h2>${list.length} campanhas</h2><div class="actions" style="align-items:center"><select aria-label="Filtrar campanhas" onchange="store.set('cm_cpf',this.value);tCampaigns()">${[['all','Todas ('+all0.length+')'],['on','Só ativas ('+all0.filter(c=>c.status==='ACTIVE').length+')'],['off','Só desativadas ('+all0.filter(c=>c.status!=='ACTIVE').length+')']].map(([v,l])=>`<option value="${v}" ${v===f?'selected':''}>${l}</option>`).join('')}</select><span class="muted" style="font-size:13px">Ordenadas por gasto no período</span></div></div>
   <div class="tbl"><table><thead><tr><th>Campanha</th><th>Status</th><th>Orçamento</th><th class="r">Gasto</th><th class="r">Compras</th><th class="r">Custo/compra</th><th class="r">Valor</th><th class="r">ROAS</th><th class="r">Leads</th><th class="r">CTR</th><th></th></tr></thead><tbody>
   ${rows.map(({c,i,sp,b,v,l})=>`<tr><td style="min-width:200px"><b>${esc(c.name)}</b><div class="lead-sub">${esc((c.objective||'').replace('OUTCOME_','').toLowerCase())} · <span class="mono">${c.id}</span></div></td>
   <td>${statusPill(c.effective_status||c.status)}</td><td class="num">${budget(c)}</td>
