@@ -1081,6 +1081,8 @@ const tCreate=guard(async()=>{
 
   <div id="nc_review"></div>
 
+  ${vtCardHtml(pages,pixels)}
+
   <div class="card" id="pasteCard"><div class="card-h"><h2>Copiar campanha com todas as configurações</h2><span class="muted" style="font-size:13px">Abre a original, você ajusta e sobe em qualquer conta ou BM</span></div>
     <div class="grid2"><div class="field"><label for="ps_src">Campanha de origem (conta ${esc(S.acc.name)})</label><select id="ps_src"><option value="">Carregando campanhas…</option></select></div>
       <div class="field"><label>&nbsp;</label><div class="actions"><button class="primary" onclick="psOpenSource()">Abrir campanha</button></div></div></div>
@@ -1099,7 +1101,7 @@ const tCreate=guard(async()=>{
   </div>`;
   $('nc_brief').oninput=e=>store.set('cm_brief',e.target.value);
   $('ps_json').oninput=psSummary;psSummary();
-  psLoadSources();
+  psLoadSources();vtFindAdv();
 });
 
 /* ---------- Copiar e colar campanha entre contas/BMs ---------- */
@@ -1564,6 +1566,75 @@ const ncLoadForms=guard(async()=>{
   if(!pg){$('nc_lf').innerHTML='<option value="">Escolha uma página</option>';return}
   const fs=S.demo?DEMO.forms:await all(`${pg.id}/leadgen_forms`,{fields:'name,id,status'},200,pg.access_token);
   $('nc_lf').innerHTML=fs.filter(f=>f.status==='ACTIVE').map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('')||'<option value="">Nenhum formulário ativo. Crie um na página primeiro.</option>';
+});
+/* ---------- Modelo "Vendas pelo site": a mesma configuração da campanha da rifa, com vários criativos ----------
+   Campanha Vendas (orçamento no conjunto) → conjunto otimizado para o evento do pixel → um anúncio por imagem. Tudo pausado. */
+const VT_DEF={name:'Vendas - Rifa iPhone 17',budget:'100',pixel:'1310298384492677',event:'PURCHASE',page:'1277678932102893',adv:'',ageMin:'18',ageMax:'65',country:'BR',
+  link:'https://sorteio.zukaentretenimento.workers.dev/iphone?utm_source=facebook&utm_campaign=sorteio',
+  text:'Rifa iPhone 17 Pro Max 256 GB. Garanta seus números a partir de R$ 0,49. Sorteio dia 24/12 às 20h. Pagamento por Pix.',title:'iPhone 17 Pro Max 256 GB',cta:'SHOP_NOW'};
+const vtCfg=()=>{try{return {...VT_DEF,...JSON.parse(store.get('cm_vt')||'{}')}}catch(e){return {...VT_DEF}}};
+const VT_EVENTS={PURCHASE:'Compra',INITIATED_CHECKOUT:'Iniciar finalização da compra',ADD_PAYMENT_INFO:'Adicionar informações de pagamento',LEAD:'Cadastro (Lead)',COMPLETE_REGISTRATION:'Cadastro concluído'};
+const VT_CTAS={SHOP_NOW:'Comprar agora',LEARN_MORE:'Saiba mais',SIGN_UP:'Cadastre-se',ORDER_NOW:'Pedir agora',GET_OFFER:'Obter oferta',BUY_NOW:'Comprar'};
+function vtCardHtml(pages,pixels){
+  const c=vtCfg(),o=(obj,v)=>Object.entries(obj).map(([k,l])=>`<option value="${esc(k)}" ${k===v?'selected':''}>${esc(l)}</option>`).join('');
+  return `<div class="card" id="vtCard"><div class="card-h"><h2>Modelo: vendas pelo site</h2><span class="muted" style="font-size:13px">Mesma configuração da campanha da rifa · vários criativos</span></div>
+    <div class="grid2">
+      <div class="field"><label for="vt_name">Nome da campanha</label><input id="vt_name" value="${esc(c.name)}"></div>
+      <div class="field"><label for="vt_budget">Orçamento diário do conjunto (R$)</label><input id="vt_budget" inputmode="decimal" value="${esc(c.budget)}"></div>
+      <div class="field"><label for="vt_pixel">Pixel</label><select id="vt_pixel">${pixels.map(p=>`<option value="${p.id}" ${p.id===c.pixel?'selected':''}>${esc(p.name)} · ${p.id}</option>`).join('')||'<option value="">Nenhum pixel nesta conta</option>'}</select></div>
+      <div class="field"><label for="vt_event">Otimizar para</label><select id="vt_event">${o(VT_EVENTS,c.event)}</select></div>
+      <div class="field"><label for="vt_page">Página do anúncio</label><input id="vt_page" list="vt_pages" value="${esc(c.page)}" placeholder="ID da página"><datalist id="vt_pages">${pages.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</datalist><div class="lead-sub">ID da página (Maria Pimentel: 1277678932102893). Ela não pode ter WhatsApp banido vinculado.</div></div>
+      <div class="field"><label for="vt_adv">Anunciante verificado (ID)</label><input id="vt_adv" value="${esc(c.adv)}" placeholder="Buscando na conta…"><div class="lead-sub">Obrigatório no Brasil. O painel busca o que já roda nesta conta.</div></div>
+      <div class="field"><label>Idade</label><div class="actions"><input id="vt_amin" type="number" style="width:80px" value="${esc(c.ageMin)}"> até <input id="vt_amax" type="number" style="width:80px" value="${esc(c.ageMax)}"></div></div>
+      <div class="field"><label for="vt_country">País (Advantage+ público ligado)</label><input id="vt_country" value="${esc(c.country)}"></div>
+      <div class="field"><label for="vt_link">Link de destino (com UTMs)</label><input id="vt_link" value="${esc(c.link)}"></div>
+      <div class="field"><label for="vt_cta">Botão</label><select id="vt_cta">${o(VT_CTAS,c.cta)}</select></div>
+      <div class="field"><label for="vt_title">Título</label><input id="vt_title" value="${esc(c.title)}"></div>
+      <div class="field"><label for="vt_imgs">Criativos (até 10 imagens · 1 anúncio por imagem)</label><input id="vt_imgs" type="file" accept="image/png,image/jpeg" multiple></div>
+    </div>
+    <div class="field" style="margin-top:10px"><label for="vt_text">Texto principal</label><textarea id="vt_text">${esc(c.text)}</textarea></div>
+    <div class="actions" style="margin-top:12px"><button onclick="vtSave(true)">Salvar modelo</button><button class="primary" onclick="vtRun()">Criar campanha pausada</button></div>
+    <div class="note">Cria: campanha <b>Vendas</b> com orçamento no conjunto, conjunto otimizado para o evento escolhido no pixel, público amplo com Advantage+ e posicionamentos automáticos, e <b>um anúncio por imagem</b>, tudo <b>pausado</b>. Sem WhatsApp e sem os aprimoramentos descontinuados.</div>
+    <div id="vt_log"></div></div>`;
+}
+/* Preenche o anunciante verificado com o que já roda em algum conjunto desta conta */
+async function vtFindAdv(){
+  const el=$('vt_adv');if(!el||el.value||S.demo)return;
+  try{const sets=await all(`${S.acc.id}/adsets`,{fields:'regional_regulation_identities'},100);const r=sets.find(s=>s.regional_regulation_identities);el.value=r?r.regional_regulation_identities.universal_beneficiary:'';el.placeholder=r?'':'Nenhum encontrado: verifique o anunciante no Gerenciador'}catch(e){el.placeholder='Não consegui buscar'}
+}
+function vtSave(show){
+  const v=id=>($(id)?.value||'').trim();
+  const c={name:v('vt_name'),budget:v('vt_budget'),pixel:v('vt_pixel'),event:v('vt_event'),page:v('vt_page'),adv:v('vt_adv'),ageMin:v('vt_amin'),ageMax:v('vt_amax'),country:v('vt_country').toUpperCase(),link:v('vt_link'),text:v('vt_text'),title:v('vt_title'),cta:v('vt_cta')};
+  store.set('cm_vt',JSON.stringify(c));if(show)toast('Modelo salvo neste navegador');return c;
+}
+const vtRun=guard(async()=>{
+  const c=vtSave(false),files=[...($('vt_imgs').files||[])].slice(0,10),log=$('vt_log'),J=JSON.stringify,acc=S.acc.id;
+  const step=(t,bad)=>log.insertAdjacentHTML('beforeend',`<div class="lead-sub" ${bad?'style="color:var(--bad)"':''}>${bad?'⚠':'✓'} ${esc(t)}</div>`);
+  if(S.demo)return toast('Exemplo: nada foi criado');
+  const miss=[!c.pixel&&'pixel',!c.page&&'página',!c.adv&&'anunciante verificado',!/^https?:\/\//.test(c.link)&&'link',!files.length&&'pelo menos 1 imagem',!(Number(c.budget.replace(',','.'))>0)&&'orçamento'].filter(Boolean);
+  if(miss.length)return showErr('appErr','Falta: '+miss.join(', ')+'.');
+  log.innerHTML='<p class="muted">Criando na Meta…</p>';
+  const pg=(await getPages()).find(p=>p.id===c.page);
+  const camp=(await api(`${acc}/campaigns`,{name:c.name,objective:'OUTCOME_SALES',status:'PAUSED',special_ad_categories:J([]),is_adset_budget_sharing_enabled:'false'},'POST')).id;step('Campanha criada (pausada)');
+  const adset=(await api(`${acc}/adsets`,{name:`${c.name} - ${c.country} Amplo`,campaign_id:camp,status:'PAUSED',daily_budget:String(Math.round(Number(c.budget.replace(',','.'))*100)),
+    billing_event:'IMPRESSIONS',optimization_goal:'OFFSITE_CONVERSIONS',bid_strategy:'LOWEST_COST_WITHOUT_CAP',promoted_object:J({pixel_id:c.pixel,custom_event_type:c.event}),
+    targeting:J({geo_locations:{countries:[c.country||'BR']},age_min:Number(c.ageMin)||18,age_max:Number(c.ageMax)||65,targeting_automation:{advantage_audience:1}}),
+    regional_regulated_categories:J(['BRAZIL_REGULATION']),regional_regulation_identities:J({universal_beneficiary:c.adv,universal_payer:c.adv}),
+    start_time:new Date(Date.now()+36e5).toISOString()},'POST')).id;step('Conjunto criado (pausado)');
+  let ok=0;
+  for(const [i,f] of files.entries()){
+    const n=String(i+1).padStart(2,'0');
+    try{
+      const hash=Object.values((await api(`${acc}/adimages`,{bytes:await readFile(f)},'POST')).images||{})[0].hash;
+      const spec={page_id:c.page,link_data:{link:c.link,message:c.text,name:c.title,image_hash:hash,call_to_action:{type:c.cta,value:{link:c.link}}}};
+      if(pg&&pg.instagram_business_account)spec.instagram_user_id=pg.instagram_business_account.id;
+      const cr=(await api(`${acc}/adcreatives`,{name:`${c.name} - Criativo ${n}`,object_story_spec:J(spec)},'POST')).id;
+      await api(`${acc}/ads`,{name:`${c.name} - Criativo ${n}`,adset_id:adset,creative:J({creative_id:cr}),status:'PAUSED'},'POST');
+      step(`Anúncio Criativo ${n} (${f.name})`);ok++;
+    }catch(e){step(`Criativo ${n} (${f.name}) falhou: ${e.message}`,true)}
+  }
+  const d=getDrafts();d.unshift({acc,camp,name:c.name,at:new Date().toISOString()});saveDrafts(d);
+  log.insertAdjacentHTML('beforeend',`<div class="note"><b>Campanha, conjunto e ${ok} anúncio(s) criados, pausados.</b> Revise e publique no Gerenciador ou em "Rascunhos criados por aqui".</div>`);
 });
 function readFile(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(f)})}
 
