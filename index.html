@@ -211,6 +211,8 @@ header.top>*{position:relative;z-index:1}
 .theme-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--on-ink);padding:7px 12px;border-radius:99px;font-size:13px}
 .theme-btn:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35);color:var(--on-ink)}
 .theme-btn svg{width:16px;height:16px}
+.prof-sel{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--on-ink);border-radius:99px;padding:6px 12px;font-weight:600;font-size:13px;max-width:220px}
+.prof-sel option{color:var(--fg);background:var(--panel)}
 [data-theme="dark"] .card,[data-theme="dark"] .kpi{box-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .kpi{box-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}}
 .wa-lim{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:end;padding:14px 16px;margin:4px 0 10px;background:var(--bg);border-radius:12px;border-left:4px solid var(--wa)}
@@ -408,6 +410,28 @@ async function saveToken(t){
   if(lockOn()){const k=dayKey();if(k){store.set('cm_tok_enc',await encTok(k,t));store.del('cm_token')}}
   else store.set('cm_token',t);
 }
+/* Perfis salvos (ex.: Gustavo e Felipe): cada um com o seu token, trocados pelo topo do painel.
+   Com a trava ligada, os tokens dos perfis também ficam cifrados com a chave do dia. */
+const profiles=()=>{try{return JSON.parse(store.get('cm_profiles')||'{}')}catch(e){return{}}};
+const saveProfiles=o=>store.set('cm_profiles',JSON.stringify(o));
+async function saveProfile(id,name,tok){
+  const all=profiles(),k=lockOn()?dayKey():null;
+  all[id]=k?{name,e:await encTok(k,tok)}:{name,t:tok};saveProfiles(all);store.set('cm_prof',id);
+}
+async function profileToken(id){
+  const p=profiles()[id];if(!p)return null;if(p.t)return p.t;
+  const k=dayKey();return k&&p.e?decTok(k,p.e):null;
+}
+/* Ao ligar ou desligar a trava, regrava os perfis no formato certo (cifrado ou não) */
+async function resaveProfiles(fromKey,toKey){
+  const all=profiles();
+  for(const [id,p] of Object.entries(all)){
+    let tok=p.t;if(!tok&&p.e&&fromKey){try{tok=await decTok(fromKey,p.e)}catch(e){}}
+    if(!tok){delete all[id];continue}
+    all[id]=toKey?{name:p.name,e:await encTok(toKey,tok)}:{name:p.name,t:tok};
+  }
+  saveProfiles(all);
+}
 function qrInto(el,url){el.innerHTML='';if(window.QRCode)new QRCode(el,{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});else el.innerHTML=`<a href="${esc(url)}">${esc(url)}</a>`}
 function lockScreen(html){let o=$('lockView');if(!o){o=document.createElement('div');o.id='lockView';o.style.cssText='position:fixed;inset:0;z-index:9000;background:var(--bg,#0d1520);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto';document.body.appendChild(o)}o.innerHTML=`<div class="card" style="max-width:420px;width:100%;text-align:center;margin:0">${html}</div>`}
 function lockClose(){clearInterval(LK.timer);const o=$('lockView');if(o)o.remove()}
@@ -439,7 +463,7 @@ async function lockOpen(after){
 const lostBtn=()=>`<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:12px"><a href="#" class="lead-sub" onclick="lockLost();return false">Perdi o celular pareado</a></div>`;
 function lockLost(){
   confirmBox('Perdeu o celular?','Isso apaga a trava e o token salvo <b>neste navegador</b>. Depois você entra com o Facebook de novo (com a sua senha) e pode ativar a trava em outro celular.','Apagar e entrar de novo',()=>{
-    ['cm_lock','cm_tok_enc','cm_lk_key','cm_lk_day','cm_token'].forEach(k=>store.del(k));lockClose();$('appView').hidden=true;$('connectView').hidden=false;
+    ['cm_lock','cm_tok_enc','cm_lk_key','cm_lk_day','cm_token','cm_profiles','cm_prof'].forEach(k=>store.del(k));lockClose();$('appView').hidden=true;$('connectView').hidden=false;
   },true);
 }
 /* Botão "Trava do celular" no topo do painel */
@@ -448,12 +472,12 @@ async function lockMenu(){
   if(!(window.crypto&&crypto.subtle))return showErr('appErr','A trava precisa do painel aberto pelo endereço https (site publicado).');
   if(lockOn()){
     confirmBox('Trava do celular ativa','Todo dia, no primeiro acesso, o painel pede aprovação no celular pareado. Desativar volta a guardar o token sem trava neste navegador.','Desativar trava',async()=>{
-      ['cm_lock','cm_tok_enc','cm_lk_key','cm_lk_day'].forEach(k=>store.del(k));store.set('cm_token',S.token);toast('Trava desativada')},true);
+      await resaveProfiles(dayKey(),null);['cm_lock','cm_tok_enc','cm_lk_key','cm_lk_day'].forEach(k=>store.del(k));store.set('cm_token',S.token);toast('Trava desativada')},true);
     return;
   }
   let j;try{j=await lockCall({acao:'novaTrava'})}catch(e){return showErr('appErr','Trava: '+e.message)}
   store.set('cm_lock',j.lock);store.set('cm_lk_key',j.key);store.set('cm_lk_day',today());
-  await saveToken(S.token);
+  await saveToken(S.token);await resaveProfiles(null,j.key);
   lockScreen(`<h2 style="margin-top:0">📱 Parear o celular</h2>
     <p class="muted">Escaneie com a câmera do celular e toque em <b>Parear este celular</b>. Use o navegador normal do celular (não anônimo).</p>
     <div id="lkQr" style="display:flex;justify-content:center;margin:16px 0;background:#fff;padding:12px;border-radius:12px;width:max-content;margin-inline:auto"></div>
@@ -467,7 +491,7 @@ async function lockMenu(){
       lockScreen(`<h2 style="margin-top:0">✅ Trava ativada</h2><p class="muted">A partir de amanhã, o primeiro acesso do dia pede aprovação neste celular. O token agora fica guardado com cadeado neste navegador.</p><div class="actions" style="justify-content:center;margin-top:12px"><button class="primary" onclick="lockClose()">Fechar</button></div>`)}}catch(e){}
   },3000);
 }
-function lockCancel(){['cm_lock','cm_tok_enc','cm_lk_key','cm_lk_day'].forEach(k=>store.del(k));store.set('cm_token',S.token);lockClose();toast('Trava não ativada')}
+async function lockCancel(){await resaveProfiles(dayKey(),null);['cm_lock','cm_tok_enc','cm_lk_key','cm_lk_day'].forEach(k=>store.del(k));store.set('cm_token',S.token);lockClose();toast('Trava não ativada')}
 
 /* ---------- Conexão ---------- */
 async function connect(){
@@ -485,13 +509,15 @@ async function connect(){
       for(const id of miss){try{S.accounts.push(await api(id,{fields:AF+',is_prepay_account,funding_source_details'}))}catch(e){}}
     }catch(e){S.bmStruct=null}
     {const seen=new Set();S.accounts=S.accounts.filter(a=>a&&!seen.has(a.id)&&seen.add(a.id))}
-    if($('rememberIn').checked){await saveToken(S.token);store.set('cm_ver',S.ver)}
+    if($('rememberIn').checked){await saveToken(S.token);store.set('cm_ver',S.ver);await saveProfile(me.id,me.name,S.token)}
     S.meId=me.id;enterApp(me.name);
   }catch(e){showErr('connectErr',e.message)}
 }
 function enterApp(name){
   $('connectView').hidden=true;$('appView').hidden=false;$('demoFlag').hidden=!S.demo;
-  $('who').innerHTML=`<span class="pill p-good">Conectado</span><span>${esc(name)}</span>`;
+  const ps=Object.entries(profiles());
+  $('who').innerHTML=`<span class="pill p-good">Conectado</span>`+(S.demo?`<span>${esc(name)}</span>`:
+    `<select id="profSel" class="prof-sel" aria-label="Perfil do Facebook" onchange="switchProfile(this.value)">${(ps.length?ps:[[S.meId,{name}]]).map(([id,p])=>`<option value="${esc(id)}" ${id===S.meId?'selected':''}>👤 ${esc(p.name)}</option>`).join('')}<option value="__add">＋ Adicionar perfil</option>${ps.length>1?'<option value="__del">✕ Remover este perfil</option>':''}</select>`);
   $('inviteBtn').hidden=S.demo||S.meId!==OWNER_ID;
   const opt=a=>`<option value="${a.id}">${isBlocked(a)?'⛔ ':''}${esc(a.name)} · ${a.account_id}${isBlocked(a)?' · BLOQUEADA':''}</option>`;
   if(!S.accounts.length)$('accSel').innerHTML='<option>Nenhuma conta encontrada</option>';
@@ -536,7 +562,22 @@ function inviteUpd(){
 ${link}`;
   $('iv_msg').value=msg;$('iv_wa').href='https://wa.me/?text='+encodeURIComponent(msg);
 }
-function logout(){store.del('cm_token');store.del('cm_tok_enc');S.token='';S.demo=false;S.cache={};S.pages=null;S.bms=null;$('appView').hidden=true;$('connectView').hidden=false;$('who').innerHTML='';$('tokenIn').value=''}
+async function switchProfile(id){
+  if(id==='__add'){$('profSel').value=S.meId;return addProfile()}
+  if(id==='__del'){$('profSel').value=S.meId;return confirmBox('Remover este perfil?','O login deste perfil sai deste navegador. Os outros perfis continuam salvos.','Remover',()=>logout(),true)}
+  if(id===S.meId)return;
+  let tok=null;try{tok=await profileToken(id)}catch(e){}
+  if(!tok){toast('Login desse perfil expirou: entre com o Facebook de novo');return addProfile()}
+  $('tokenIn').value=tok;$('rememberIn').checked=true;toast('Trocando para '+(profiles()[id]||{}).name+'…');connect();
+}
+function addProfile(){
+  confirmBox('Adicionar outro perfil','Na tela do Facebook, clique em <b>Entrar em outra conta</b> (ou "Não é você?") e entre com o outro perfil, por exemplo o do Felipe. Depois os dois ficam salvos aqui e você troca pelo topo do painel.','Continuar para o Facebook',()=>fbLogin());
+}
+function logout(){
+  const all=profiles();delete all[S.meId];saveProfiles(all);
+  const next=Object.keys(all)[0];
+  if(next){store.set('cm_prof',next);return switchProfile(next)}
+  store.del('cm_prof');store.del('cm_token');store.del('cm_tok_enc');S.token='';S.demo=false;S.cache={};S.pages=null;S.bms=null;$('appView').hidden=true;$('connectView').hidden=false;$('who').innerHTML='';$('tokenIn').value=''}
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.tab=b.dataset.t;loadTab()});
 
 async function loadTab(force){
